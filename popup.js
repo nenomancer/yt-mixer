@@ -12,20 +12,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const tabElement = document.createElement("div");
       tabElement.classList.add("tab");
       tabElement.setAttribute("data-id", tab.id);
+      tabElement.tabIndex = 0;
 
       // Create the title element
-      const titleElement = createElement("h4", ["title"], {}, tab.title);
+      const titleElement = createElement(
+        "h4",
+        ["title"],
+        {},
+        tab.title.replace(/- YouTube$/, "")
+      );
       tabElement.appendChild(titleElement);
 
       // Create the controls container
       const controlsContainer = createElement("div", ["controls"]);
 
-      // Create the checkbox input
-      const checkbox = createElement("input", ["select"], {
-        type: "checkbox",
-        "data-id": tab.id,
+      tabElement.addEventListener("click", (e) => {
+        if (e.target.className == "tab" || e.target.className == "title") {
+          handleTabs(tabElement, selectedTabs);
+        }
       });
-      controlsContainer.appendChild(checkbox);
 
       // Create the mute button
       const muteButton = createElement(
@@ -57,35 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       controlsContainer.appendChild(volumeSlider);
 
-      // SELECT CHECKBOX:
-      checkbox.addEventListener("change", () => {
-        if (checkbox.checked) {
-          // If there are already 2 selected tabs, remove the last one
-          if (selectedTabs.length >= 2) {
-            const removedTab = selectedTabs.pop();
-            removedTab.querySelector('input[type="checkbox"]').checked = false;
-            removedTab.removeAttribute("data-selected");
-            removedTab.querySelector('input[type="range"]').disabled = true;
-          }
-
-          // Add the current tab to the selectedTabs array
-          selectedTabs.push(tabElement);
-        } else {
-          // If unchecked, remove the tab from selectedTabs
-          tabElement.removeAttribute("data-selected");
-          const index = selectedTabs.indexOf(tabElement);
-          if (index !== -1) {
-            selectedTabs.splice(index, 1);
-          }
-        }
-
-        // Update the data-selected attribute on all selected tabs
-        selectedTabs.forEach((tab, index) => {
-          tab.setAttribute("data-selected", index);
-          tab.querySelector('input[type="range"]').disabled = false;
-        });
-      });
-
       muteButton.addEventListener("click", () => {
         toggleMute(tab.id);
       });
@@ -97,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
       volumeSlider.addEventListener("input", () => {
         const volume = volumeSlider.value;
         setVolume(tab.id, volume);
-        console.log("actually this id: ", tab.id);
 
         selectedTabs.forEach((tab, index) => {
           if (tabElement === tab || tab.getAttribute("data-selected") == 0)
@@ -108,9 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const otherVolume = total - volume;
           const otherVolumeSlider = tab.querySelector('input[type="range"]');
           otherVolumeSlider.value = otherVolume;
-          console.log("otherVolume needs to be: ", otherVolume);
           const otherId = parseInt(tab.getAttribute("data-id"));
-          console.log("other id: ", otherId);
           setVolume(otherId, otherVolume);
         });
       });
@@ -123,6 +96,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+function handleTabs(tabElement, selectedTabs) {
+  if (!tabElement.getAttribute("data-selected")) {
+    if (selectedTabs.length >= 2) {
+      const removedTab = selectedTabs.pop();
+      removedTab.removeAttribute("data-selected");
+      removedTab.querySelector('input[type="range"]').disabled = true;
+    }
+    selectedTabs.push(tabElement);
+  } else {
+    tabElement.removeAttribute("data-selected");
+    const index = selectedTabs.indexOf(tabElement);
+    if (index !== -1) {
+      selectedTabs.splice(index, 1);
+    }
+  }
+
+  // Update the data-selected attribute on all selected tabs
+  selectedTabs.forEach((tab, index) => {
+    tab.setAttribute("data-selected", index);
+    tab.querySelector('input[type="range"]').disabled = false;
+  });
+}
 
 function toggleMute(id) {
   chrome.tabs.sendMessage(id, { action: "toggleMute" });
