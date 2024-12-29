@@ -51,8 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "data-id": tab.id,
         min: 0,
         max: 1,
-        step: 0.05,
+        step: 0.005,
         value: 0.5,
+        disabled: true,
       });
       controlsContainer.appendChild(volumeSlider);
 
@@ -64,6 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const removedTab = selectedTabs.pop();
             removedTab.querySelector('input[type="checkbox"]').checked = false;
             removedTab.removeAttribute("data-selected");
+            removedTab.querySelector('input[type="range"]').disabled = true;
           }
 
           // Add the current tab to the selectedTabs array
@@ -80,23 +82,36 @@ document.addEventListener("DOMContentLoaded", () => {
         // Update the data-selected attribute on all selected tabs
         selectedTabs.forEach((tab, index) => {
           tab.setAttribute("data-selected", index);
+          tab.querySelector('input[type="range"]').disabled = false;
         });
       });
 
       muteButton.addEventListener("click", () => {
-        chrome.tabs.sendMessage(tab.id, { action: "toggleMute" });
-        if (muteButton.checked) {
-        }
+        toggleMute(tab.id);
       });
 
       playPauseButton.addEventListener("click", () => {
-        chrome.tabs.sendMessage(tab.id, { action: "togglePlayPause" });
+        togglePlay(tab.id);
       });
 
       volumeSlider.addEventListener("input", () => {
-        chrome.tabs.sendMessage(tab.id, {
-          action: "setVolume",
-          volume: volumeSlider.value,
+        const volume = volumeSlider.value;
+        setVolume(tab.id, volume);
+        console.log("actually this id: ", tab.id);
+
+        selectedTabs.forEach((tab, index) => {
+          if (tabElement === tab || tab.getAttribute("data-selected") == 0)
+            return;
+
+          const total = 1.0;
+
+          const otherVolume = total - volume;
+          const otherVolumeSlider = tab.querySelector('input[type="range"]');
+          otherVolumeSlider.value = otherVolume;
+          console.log("otherVolume needs to be: ", otherVolume);
+          const otherId = parseInt(tab.getAttribute("data-id"));
+          console.log("other id: ", otherId);
+          setVolume(otherId, otherVolume);
         });
       });
 
@@ -108,6 +123,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+function toggleMute(id) {
+  chrome.tabs.sendMessage(id, { action: "toggleMute" });
+}
+
+function setVolume(id, volume) {
+  chrome.tabs.sendMessage(id, {
+    action: "setVolume",
+    volume: volume,
+  });
+}
+
+function togglePlay(id) {
+  chrome.tabs.sendMessage(id, { action: "togglePlayPause" });
+}
 
 function createElement(
   tag,
