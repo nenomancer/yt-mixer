@@ -9,15 +9,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tabs.forEach((tab) => {
-      const tabElement = document.createElement("div");
-      tabElement.classList.add("tab");
+      const tabElement = createElement("div", ["tab", "select"]);
+      // tabElement.classList.add("tab");
       tabElement.setAttribute("data-id", tab.id);
       tabElement.tabIndex = 0;
 
       // Create the title element
       const titleElement = createElement(
         "h4",
-        ["title"],
+        ["title", "select"],
         {},
         tab.title.replace(/- YouTube$/, "")
       );
@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const controlsContainer = createElement("div", ["controls"]);
 
       tabElement.addEventListener("click", (e) => {
-        if (e.target.className == "tab" || e.target.className == "title") {
+        if (e.target.classList.contains("select")) {
           handleTabs(tabElement, selectedTabs);
         }
       });
@@ -107,6 +107,8 @@ function handleTabs(tabElement, selectedTabs) {
     selectedTabs.push(tabElement);
   } else {
     tabElement.removeAttribute("data-selected");
+    tabElement.querySelector('input[type="range"]').disabled = true;
+
     const index = selectedTabs.indexOf(tabElement);
     if (index !== -1) {
       selectedTabs.splice(index, 1);
