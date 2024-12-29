@@ -16,5 +16,7 @@ chrome.runtime.onMessage.addListener((message) => {
     case "setVolume":
       video.volume = parseFloat(message.volume);
       break;
+    case "setSpeed":
+      video.playbackRate = parseFloat(message.speed);
   }
 });

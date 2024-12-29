@@ -61,6 +61,15 @@ document.addEventListener("DOMContentLoaded", () => {
         disabled: true,
       });
       controlsContainer.appendChild(volumeSlider);
+      const speedSlider = createElement("input", ["speed"], {
+        type: "range",
+        "data-id": tab.id,
+        min: 0.25,
+        max: 2,
+        step: 0.005,
+        value: 1,
+      });
+      controlsContainer.appendChild(speedSlider);
 
       muteButton.addEventListener("click", () => {
         toggleMute(tab.id);
@@ -86,6 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
           const otherId = parseInt(tab.getAttribute("data-id"));
           setVolume(otherId, otherVolume);
         });
+      });
+
+      speedSlider.addEventListener("input", () => {
+        const speed = speedSlider.value;
+        chrome.tabs.sendMessage(tab.id, { action: "setSpeed", speed });
       });
 
       // Append the controls container to the tab element
