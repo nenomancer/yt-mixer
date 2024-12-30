@@ -30,6 +30,9 @@
 
   &:nth-child(2) {
     background-color: purple;
+    .controls input[type="range"] {
+      order: -1;
+    }
   }
 
   .title {
@@ -60,7 +63,8 @@
 
 .controls {
   border: 1px solid orange;
-  width: fit-content;
+  /* width: fit-content; */
+  display: flex;
 
   input[type="range"][orient="vertical"] {
     writing-mode: vertical-lr;
@@ -68,5 +72,31 @@
     appearance: slider-vertical;
     width: 16px;
     vertical-align: bottom;
+
+    -webkit-appearance: none; /* Override default CSS styles */
+    appearance: none;
+    height: 128px; /* Full-width */
+    width: 25px; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
+    transition: opacity 0.2s;
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Override default look */
+      appearance: none;
+      width: 25px; /* Set a specific slider handle width */
+      height: 25px; /* Slider handle height */
+      background: #04aa6d; /* Green background */
+      cursor: pointer; /* Cursor on hover */
+    }
+
+    &::-moz-range-thumb {
+      width: 25px; /* Set a specific slider handle width */
+      height: 25px; /* Slider handle height */
+      background: #04aa6d; /* Green background */
+      cursor: pointer; /* Cursor on hover */
+    }
   }
 }
