@@ -14,6 +14,26 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    lockVolume.addEventListener("change", () => {
+      // if first selected is playing (get playing state)
+      tabs.forEach((tab) => {
+        chrome.tabs.sendMessage(tab.id, { action: "getPlaying" }, () => {
+          const firstTrack = document.querySelector('.tab[data-selected="0"] ');
+          const secondTrack = document.querySelector(
+            '.tab[data-selected="1"] '
+          );
+
+          const firstSlider = firstTrack.querySelector(".volume");
+          const secondSlider = secondTrack.querySelector(".volume");
+
+          if (firstTrack && secondTrack) {
+            secondSlider.value = firstSlider.value;
+            setLockedVolume(firstTrack, selectedTabs, firstSlider.value);
+          }
+        });
+      });
+    });
+
     tabs.forEach((tab) => {
       togglePlay(tab.id, false);
       setVolume(tab.id, 0.5);
@@ -42,27 +62,89 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getPlaybackInfo" },
         (playbackInfo) => {
-          console.log("playback info: ", playbackInfo);
-          const slider = createElement("input", ["playback-slider"], {
+          // Create the volume input range
+          const volumeSlider = createElement("input", ["volume"], {
+            type: "range",
+            "data-id": tab.id,
+            min: 0,
+            max: 1,
+            step: 0.005,
+            value: playbackInfo.volume,
+            "data-content": `Volume: ${playbackInfo.volume}`,
+          });
+
+          volumeSlider.addEventListener("click", (event) => {
+            if (!event.ctrlKey) return;
+            const volume = 0.5;
+            volumeSlider.value = volume;
+            volumeSlider.setAttribute(
+              "data-content",
+              `Volume: ${volumeSlider.value}`
+            );
+            setVolume(tab.id, volume, volumeSlider);
+
+            if (!lockVolume.checked) return;
+            setLockedVolume(tabElement, selectedTabs, volume);
+          });
+
+          volumeSlider.addEventListener("input", () => {
+            const volume = volumeSlider.value;
+            setVolume(tab.id, volume, volumeSlider);
+
+            if (!lockVolume.checked) return;
+            setLockedVolume(tabElement, selectedTabs, volume);
+          });
+          controlsContainer.appendChild(volumeSlider);
+
+          // Create the speed slider
+          const speedSlider = createElement("input", ["speed"], {
+            type: "range",
+            "data-id": tab.id,
+            min: 0.25,
+            max: 1.75,
+            step: 0.005,
+            value: playbackInfo.speed,
+            "data-content": `Speed: ${playbackInfo.speed}`,
+          });
+          controlsContainer.appendChild(speedSlider);
+
+          speedSlider.addEventListener("click", (event) => {
+            if (!event.ctrlKey) return;
+
+            const speed = 1;
+            setSpeed(tab.id, speed, speedSlider);
+          });
+
+          speedSlider.addEventListener("input", () => {
+            setSpeed(tab.id, speedSlider.value, speedSlider);
+          });
+
+          const playbackSlider = createElement("input", ["playback-slider"], {
             type: "range",
             min: "0",
             max: playbackInfo.duration,
             value: playbackInfo.currentTime,
+            "data-content": `${formatTime(
+              playbackInfo.currentTime
+            )} / ${formatTime(playbackInfo.duration)}`,
           });
 
-          slider.addEventListener("input", () => {
-            console.log("VALUE SLIDER: ", slider.value);
+          playbackSlider.addEventListener("input", () => {
             isDragging = true;
-            console.log("is dragging ", isDragging);
+            playbackSlider.setAttribute(
+              "data-content",
+              `${formatTime(playbackSlider.value)} / ${formatTime(
+                playbackSlider.max
+              )}`
+            );
             chrome.tabs.sendMessage(tab.id, {
               action: "seek",
-              time: slider.value,
+              time: playbackSlider.value,
             });
           });
 
-          slider.addEventListener("change", () => {
+          playbackSlider.addEventListener("change", () => {
             isDragging = false;
-            console.log("stopped dragging.. ", isDragging);
           });
 
           setInterval(() => {
@@ -72,49 +154,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 { action: "getPlaybackInfo" },
                 (updatedInfo) => {
                   if (updatedInfo && !updatedInfo.error) {
-                    slider.value = updatedInfo.currentTime;
+                    playbackSlider.value = updatedInfo.currentTime;
+                    playbackSlider.setAttribute(
+                      "data-content",
+                      `${formatTime(playbackSlider.value)} / ${formatTime(
+                        playbackSlider.max
+                      )}`
+                    );
                   }
                 }
               );
             }
           }, 1000);
 
-          controlsContainer.appendChild(slider);
-
-          // Create the volume input range
-          const volumeSlider = createElement("input", ["volume"], {
-            type: "range",
-            "data-id": tab.id,
-            min: 0,
-            max: 1,
-            step: 0.005,
-            value: playbackInfo.volume,
-          });
-          controlsContainer.appendChild(volumeSlider);
-
-          const speedSlider = createElement("input", ["speed"], {
-            type: "range",
-            "data-id": tab.id,
-            min: 0.25,
-            max: 2,
-            step: 0.005,
-            value: playbackInfo.speed,
-          });
-          controlsContainer.appendChild(speedSlider);
-
-          volumeSlider.addEventListener("input", () => {
-            const volume = volumeSlider.value;
-            setVolume(tab.id, volume);
-
-            if (!lockVolume.checked) return;
-
-            setLockedVolume(tabElement, selectedTabs, volume);
-          });
-
-          speedSlider.addEventListener("input", () => {
-            const speed = speedSlider.value;
-            chrome.tabs.sendMessage(tab.id, { action: "setSpeed", speed });
-          });
+          controlsContainer.appendChild(playbackSlider);
 
           return true;
         }
@@ -137,22 +190,25 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       tabElement.appendChild(title);
       // Create the mute button
-      const muteButton = createElement(
-        "input",
-        ["mute"],
-        { type: "checkbox", "data-id": tab.id },
-        "Mute"
-      );
-      controlsContainer.appendChild(muteButton);
+      const muteCheckbox = createElement("input", ["mute"], {
+        type: "checkbox",
+        "data-id": tab.id,
+        id: `mute-${tab.id}`,
+        "data-content": "Mute",
+      });
+
+      controlsContainer.appendChild(muteCheckbox);
       // Create the play/pause checkbox
 
       const playPauseCheckbox = createElement("input", ["playpause"], {
         type: "checkbox",
+        id: `playpause-${tab.id}`,
+        "data-content": "Play/Pause",
       });
       controlsContainer.appendChild(playPauseCheckbox);
 
-      muteButton.addEventListener("change", () => {
-        toggleMute(tab.id, muteButton.checked);
+      muteCheckbox.addEventListener("change", () => {
+        toggleMute(tab.id, muteCheckbox.checked);
       });
 
       playPauseCheckbox.addEventListener("change", () => {
@@ -203,6 +259,13 @@ function handleTabs(tabElement, selectedTabs) {
     tab.setAttribute("data-selected", index);
     tab.querySelector('input[type="range"]').disabled = false;
   });
+}
+
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
 }
 
 function getYouTubeVideoID(url) {
@@ -266,11 +329,20 @@ function toggleMute(id, isChecked) {
   }
 }
 
-function setVolume(id, volume) {
+function setVolume(id, volume, element) {
+  if (element) {
+    element.setAttribute("data-content", `Volume: ${volume}`);
+  }
   chrome.tabs.sendMessage(id, {
     action: "setVolume",
     volume: volume,
   });
+}
+
+function setSpeed(id, speed, element) {
+  element.value = speed;
+  element.setAttribute("data-content", `Speed: ${element.value}`);
+  chrome.tabs.sendMessage(id, { action: "setSpeed", speed });
 }
 
 function setLockedVolume(tabElement, selectedTabs, volume) {
@@ -283,7 +355,7 @@ function setLockedVolume(tabElement, selectedTabs, volume) {
     const otherVolumeSlider = tab.querySelector(".volume");
     otherVolumeSlider.value = otherVolume;
     const otherId = parseInt(tab.getAttribute("data-id"));
-    setVolume(otherId, otherVolume);
+    setVolume(otherId, otherVolume, otherVolumeSlider);
   });
 }
 

@@ -14,6 +14,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       video.play();
       break;
     }
+    case "getPlaying": {
+      sendResponse({
+        isPlaying: !video.paused,
+      });
+      break;
+    }
     case "setPaused": {
       video.pause();
       break;
