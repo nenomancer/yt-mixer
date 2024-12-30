@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const tabsContainer = document.getElementById("tabs");
   const thumbnailContainer = document.getElementById("thumbnails");
+  const lockVolume = document.getElementById("lock-volume");
+
   const selectedTabs = [];
   const selectedThumbnails = [];
-  const newSelectedTabs = [];
 
   function getYouTubeVideoID(url) {
     const urlObj = new URL(url);
@@ -24,150 +25,110 @@ document.addEventListener("DOMContentLoaded", () => {
       const videoID = getYouTubeVideoID(tab.url);
       const thumbnailURL = getYouTubeThumbnail(videoID);
       const thumbnail = createElement("img", ["thumbnail", "select"], {
+        "data-thumb-id": tab.id,
         src: thumbnailURL,
       });
       thumbnailContainer.appendChild(thumbnail);
+      const tabElement = createElement("div", ["tab", "select"]);
+      tabElement.setAttribute("data-id", tab.id);
+      tabElement.tabIndex = 0;
 
       thumbnail.addEventListener("click", (e) => {
-        if (!thumbnail.getAttribute("data-selected")) {
-          if (selectedThumbnails.length >= 2) {
-            const removedTab = selectedThumbnails.pop();
-            removedTab.removeAttribute("data-selected");
-            newSelectedTabs.pop();
-          }
-          selectedThumbnails.push(thumbnail);
-          newSelectedTabs.push(tab);
-        } else {
-          thumbnail.removeAttribute("data-selected");
+        console.log("thumbnail clicked");
+        handleThumbnailClick(
+          thumbnail,
+          tabElement,
+          selectedThumbnails,
+          selectedTabs
+        );
+      });
 
-          const index = selectedThumbnails.indexOf(thumbnail);
-          if (index !== -1) {
-            selectedThumbnails.splice(index, 1);
-          }
+      // Create the controls container
+      const controlsContainer = createElement("div", ["controls"]);
 
-          const newIndex = newSelectedTabs.indexOf(tab);
-          if (newIndex !== -1) {
-            newSelectedTabs.splice(index, 1);
-          }
+      tabElement.addEventListener("click", (e) => {
+        if (e.target.classList.contains("select")) {
+          handleTabs(tabElement, selectedTabs);
         }
-
-        // Update the data-selected attribute on all selected tabs
-        selectedThumbnails.forEach((tab, index) => {
-          console.log("tabbbbb: ", tab);
-          tab.setAttribute("data-selected", index);
-        });
-
-        // Regenerate the tabs (should rename these)
-        generateTabs();
       });
+
+      // Create the mute button
+      const muteButton = createElement(
+        "button",
+        ["mute"],
+        { "data-id": tab.id },
+        "Mute"
+      );
+      controlsContainer.appendChild(muteButton);
+
+      // Create the play/pause button
+      const playPauseButton = createElement(
+        "button",
+        ["playpause"],
+        { "data-id": tab.id },
+        "Play/Pause"
+      );
+      controlsContainer.appendChild(playPauseButton);
+
+      // Create the volume input range
+      const volumeSlider = createElement("input", ["volume"], {
+        type: "range",
+        "data-id": tab.id,
+        min: 0,
+        max: 1,
+        step: 0.005,
+        value: 0.5,
+        disabled: true,
+      });
+      controlsContainer.appendChild(volumeSlider);
+      const speedSlider = createElement("input", ["speed"], {
+        type: "range",
+        "data-id": tab.id,
+        min: 0.25,
+        max: 2,
+        step: 0.005,
+        value: 1,
+      });
+      controlsContainer.appendChild(speedSlider);
+
+      muteButton.addEventListener("click", () => {
+        toggleMute(tab.id);
+      });
+
+      playPauseButton.addEventListener("click", () => {
+        togglePlay(tab.id);
+      });
+
+      volumeSlider.addEventListener("input", () => {
+        const volume = volumeSlider.value;
+        setVolume(tab.id, volume);
+
+        if (!lockVolume.checked) return;
+
+        selectedTabs.forEach((tab, index) => {
+          if (tabElement === tab) return;
+
+          const total = 1.0;
+
+          const otherVolume = total - volume;
+          const otherVolumeSlider = tab.querySelector('input[type="range"]');
+          otherVolumeSlider.value = otherVolume;
+          const otherId = parseInt(tab.getAttribute("data-id"));
+          setVolume(otherId, otherVolume);
+        });
+      });
+
+      speedSlider.addEventListener("input", () => {
+        const speed = speedSlider.value;
+        chrome.tabs.sendMessage(tab.id, { action: "setSpeed", speed });
+      });
+
+      // Append the controls container to the tab element
+      tabElement.appendChild(controlsContainer);
+
+      // Now append tabElement to the tabsContainer
+      tabsContainer.appendChild(tabElement);
     });
-
-    function generateTabs() {
-      tabsContainer.innerHTML = "";
-      newSelectedTabs.forEach((tab) => {
-        const tabElement = createElement("div", ["tab", "select"]);
-        tabElement.setAttribute("data-id", tab.id);
-        tabElement.tabIndex = 0;
-
-        // Create the title element
-        const titleElement = createElement(
-          "h4",
-          ["title", "select"],
-          {},
-          tab.title.replace(/- YouTube$/, "")
-        );
-        tabElement.appendChild(titleElement);
-
-        // Create the controls container
-        const controlsContainer = createElement("div", ["controls"]);
-
-        tabElement.addEventListener("click", (e) => {
-          if (e.target.classList.contains("select")) {
-            handleTabs(tabElement, selectedTabs);
-          }
-        });
-
-        // Create the mute button
-        const muteButton = createElement(
-          "button",
-          ["mute"],
-          { "data-id": tab.id },
-          "Mute"
-        );
-        controlsContainer.appendChild(muteButton);
-
-        // Create the play/pause button
-        const playPauseButton = createElement(
-          "button",
-          ["playpause"],
-          { "data-id": tab.id },
-          "Play/Pause"
-        );
-        controlsContainer.appendChild(playPauseButton);
-
-        // Create the volume input range
-        const volumeSlider = createElement("input", ["volume"], {
-          type: "range",
-          "data-id": tab.id,
-          orient: "vertical",
-          min: 0,
-          max: 1,
-          step: 0.005,
-          value: 0.5,
-        });
-        controlsContainer.appendChild(volumeSlider);
-
-        volumeSlider.addEventListener("input", () => {
-          const volume = volumeSlider.value;
-          setVolume(tab.id, volume);
-
-          selectedTabs.forEach((tab, index) => {
-            if (tabElement === tab || tab.getAttribute("data-selected") == 0)
-              return;
-
-            const total = 1.0;
-
-            const otherVolume = total - volume;
-            const otherVolumeSlider = tab.querySelector('input[type="range"]');
-            otherVolumeSlider.value = otherVolume;
-            const otherId = parseInt(tab.getAttribute("data-id"));
-            setVolume(otherId, otherVolume);
-          });
-        });
-
-        // Create the speed input range
-        const speedSlider = createElement("input", ["speed"], {
-          type: "range",
-          "data-id": tab.id,
-          orient: "vertical",
-          min: 0.25,
-          max: 2,
-          step: 0.005,
-          value: 1,
-        });
-        controlsContainer.appendChild(speedSlider);
-        speedSlider.addEventListener("input", () => {
-          const speed = speedSlider.value;
-          chrome.tabs.sendMessage(tab.id, { action: "setSpeed", speed });
-        });
-
-        // Create the mute button
-        muteButton.addEventListener("click", () => {
-          toggleMute(tab.id);
-        });
-
-        // Create the play/pause button
-        playPauseButton.addEventListener("click", () => {
-          togglePlay(tab.id);
-        });
-
-        // Append the controls container to the tab element
-        tabElement.appendChild(controlsContainer);
-
-        // Now append tabElement to the tabsContainer
-        tabsContainer.appendChild(tabElement);
-      });
-    }
   });
 });
 
@@ -176,10 +137,12 @@ function handleTabs(tabElement, selectedTabs) {
     if (selectedTabs.length >= 2) {
       const removedTab = selectedTabs.pop();
       removedTab.removeAttribute("data-selected");
+      removedTab.querySelector('input[type="range"]').disabled = true;
     }
     selectedTabs.push(tabElement);
   } else {
     tabElement.removeAttribute("data-selected");
+    tabElement.querySelector('input[type="range"]').disabled = true;
 
     const index = selectedTabs.indexOf(tabElement);
     if (index !== -1) {
@@ -190,6 +153,51 @@ function handleTabs(tabElement, selectedTabs) {
   // Update the data-selected attribute on all selected tabs
   selectedTabs.forEach((tab, index) => {
     tab.setAttribute("data-selected", index);
+    tab.querySelector('input[type="range"]').disabled = false;
+  });
+}
+
+function handleThumbnailClick(
+  thumbnail,
+  tabElement,
+  selectedThumbnails,
+  selectedTabs
+) {
+  if (!tabElement.getAttribute("data-selected")) {
+    if (selectedTabs.length >= 2) {
+      const removedThumbnail = selectedThumbnails.pop();
+      removedThumbnail.removeAttribute("data-selected");
+
+      const removedTab = selectedTabs.pop();
+      removedTab.removeAttribute("data-selected");
+      removedTab.querySelector('input[type="range"]').disabled = true;
+    }
+    selectedTabs.push(tabElement);
+    selectedThumbnails.push(thumbnail);
+  } else {
+    thumbnail.removeAttribute("data-selected");
+
+    tabElement.removeAttribute("data-selected");
+    tabElement.querySelector('input[type="range"]').disabled = true;
+    const thumbIndex = selectedThumbnails.indexOf(thumbnail);
+    if (thumbIndex !== -1) {
+      selectedThumbnails.splice(thumbIndex, 1);
+    }
+
+    const index = selectedTabs.indexOf(tabElement);
+    if (index !== -1) {
+      selectedTabs.splice(index, 1);
+    }
+  }
+
+  // Update the data-selected attribute on all selected tabs
+  selectedTabs.forEach((tab, index) => {
+    tab.setAttribute("data-selected", index);
+    tab.querySelector('input[type="range"]').disabled = false;
+  });
+
+  selectedThumbnails.forEach((thumbnail, index) => {
+    thumbnail.setAttribute("data-selected", index);
   });
 }
 
