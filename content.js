@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const video = document.querySelector("video");
   if (!video) return;
 
@@ -23,5 +23,19 @@ chrome.runtime.onMessage.addListener((message) => {
       break;
     case "setSpeed":
       video.playbackRate = parseFloat(message.speed);
+      break;
+    case "getPlaybackInfo":
+      console.log("getting playback info..");
+      sendResponse({
+        currentTime: video.currentTime,
+        duration: video.duration,
+        title: document.title,
+      });
+      break;
+    case "seek":
+      console.log("SEEKING TO: ", message.time);
+      video.currentTime = parseFloat(message.time);
+      sendResponse({ success: true });
+      break;
   }
 });

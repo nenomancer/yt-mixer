@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const thumbnailContainer = document.getElementById("thumbnails");
   const lockVolume = document.getElementById("lock-volume");
   const lockPlayPause = document.getElementById("lock-playpause");
+  let isDragging = false;
 
   const selectedTabs = [];
   const selectedThumbnails = [];
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tabs.forEach((tab) => {
       togglePlay(tab.id, false);
+      setVolume(tab.id, 0.5);
       const videoID = getYouTubeVideoID(tab.url);
       const thumbnailURL = getYouTubeThumbnail(videoID);
       const thumbnail = createElement("img", ["thumbnail", "select"], {
@@ -22,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         src: thumbnailURL,
       });
       thumbnailContainer.appendChild(thumbnail);
-      const tabElement = createElement("div", ["tab", "select"]);
+      const tabElement = createElement("div", ["tab"]);
       tabElement.setAttribute("data-id", tab.id);
       tabElement.tabIndex = 0;
 
@@ -35,6 +37,53 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       });
 
+      // CREATE TIME SLIDER
+      chrome.tabs.sendMessage(
+        tab.id,
+        { action: "getPlaybackInfo" },
+        (playbackInfo) => {
+          console.log("playback info: ", playbackInfo);
+          const slider = createElement("input", ["playback-slider"], {
+            type: "range",
+            min: "0",
+            max: playbackInfo.duration,
+            value: playbackInfo.currentTime,
+          });
+
+          slider.addEventListener("input", () => {
+            console.log("VALUE SLIDER: ", slider.value);
+            isDragging = true;
+            console.log("is dragging ", isDragging);
+            chrome.tabs.sendMessage(tab.id, {
+              action: "seek",
+              time: slider.value,
+            });
+          });
+
+          slider.addEventListener("change", () => {
+            isDragging = false;
+            console.log("stopped dragging.. ", isDragging);
+          });
+
+          setInterval(() => {
+            if (!isDragging) {
+              chrome.tabs.sendMessage(
+                tab.id,
+                { action: "getPlaybackInfo" },
+                (updatedInfo) => {
+                  if (updatedInfo && !updatedInfo.error) {
+                    slider.value = updatedInfo.currentTime;
+                  }
+                }
+              );
+            }
+          }, 1000);
+
+          controlsContainer.appendChild(slider);
+          return true;
+        }
+      );
+
       // Create the controls container
       const controlsContainer = createElement("div", ["controls"]);
 
@@ -44,6 +93,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
+      const title = createElement(
+        "h4",
+        ["title"],
+        {},
+        tab.title.replace(/- YouTube$/, "")
+      );
+      tabElement.appendChild(title);
       // Create the mute button
       const muteButton = createElement(
         "input",
