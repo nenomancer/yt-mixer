@@ -2,18 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabsContainer = document.getElementById("tabs");
   const thumbnailContainer = document.getElementById("thumbnails");
   const lockVolume = document.getElementById("lock-volume");
+  const lockPlayPause = document.getElementById("lock-playpause");
 
   const selectedTabs = [];
   const selectedThumbnails = [];
-
-  function getYouTubeVideoID(url) {
-    const urlObj = new URL(url);
-    return urlObj.searchParams.get("v");
-  }
-
-  function getYouTubeThumbnail(videoID, quality = "hqdefault") {
-    return `https://img.youtube.com/vi/${videoID}/${quality}.jpg`;
-  }
 
   chrome.runtime.sendMessage({ action: "getYouTubeTabs" }, (response) => {
     const tabs = response.tabs;
@@ -22,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     tabs.forEach((tab) => {
+      togglePlay(tab.id, false);
       const videoID = getYouTubeVideoID(tab.url);
       const thumbnailURL = getYouTubeThumbnail(videoID);
       const thumbnail = createElement("img", ["thumbnail", "select"], {
@@ -34,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
       tabElement.tabIndex = 0;
 
       thumbnail.addEventListener("click", (e) => {
-        console.log("thumbnail clicked");
         handleThumbnailClick(
           thumbnail,
           tabElement,
@@ -54,21 +46,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Create the mute button
       const muteButton = createElement(
-        "button",
+        "input",
         ["mute"],
-        { "data-id": tab.id },
+        { type: "checkbox", "data-id": tab.id },
         "Mute"
       );
       controlsContainer.appendChild(muteButton);
+      // Create the play/pause checkbox
 
-      // Create the play/pause button
-      const playPauseButton = createElement(
-        "button",
-        ["playpause"],
-        { "data-id": tab.id },
-        "Play/Pause"
-      );
-      controlsContainer.appendChild(playPauseButton);
+      const playPauseCheckbox = createElement("input", ["playpause"], {
+        type: "checkbox",
+      });
+      controlsContainer.appendChild(playPauseCheckbox);
 
       // Create the volume input range
       const volumeSlider = createElement("input", ["volume"], {
@@ -91,12 +80,24 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       controlsContainer.appendChild(speedSlider);
 
-      muteButton.addEventListener("click", () => {
-        toggleMute(tab.id);
+      muteButton.addEventListener("change", () => {
+        toggleMute(tab.id, muteButton.checked);
       });
 
-      playPauseButton.addEventListener("click", () => {
-        togglePlay(tab.id);
+      playPauseCheckbox.addEventListener("change", () => {
+        togglePlay(tab.id, playPauseCheckbox.checked);
+
+        if (!lockPlayPause.checked) return;
+
+        selectedTabs.forEach((tab) => {
+          if (tabElement === tab) return;
+
+          const otherPlayPauseCheckbox = tab.querySelector(".playpause");
+          otherPlayPauseCheckbox.checked = playPauseCheckbox.checked;
+
+          const otherId = parseInt(tab.getAttribute("data-id"));
+          togglePlay(otherId, otherPlayPauseCheckbox.checked);
+        });
       });
 
       volumeSlider.addEventListener("input", () => {
@@ -105,17 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!lockVolume.checked) return;
 
-        selectedTabs.forEach((tab, index) => {
-          if (tabElement === tab) return;
-
-          const total = 1.0;
-
-          const otherVolume = total - volume;
-          const otherVolumeSlider = tab.querySelector('input[type="range"]');
-          otherVolumeSlider.value = otherVolume;
-          const otherId = parseInt(tab.getAttribute("data-id"));
-          setVolume(otherId, otherVolume);
-        });
+        setLockedVolume(tabElement, selectedTabs, volume);
       });
 
       speedSlider.addEventListener("input", () => {
@@ -155,6 +146,15 @@ function handleTabs(tabElement, selectedTabs) {
     tab.setAttribute("data-selected", index);
     tab.querySelector('input[type="range"]').disabled = false;
   });
+}
+
+function getYouTubeVideoID(url) {
+  const urlObj = new URL(url);
+  return urlObj.searchParams.get("v");
+}
+
+function getYouTubeThumbnail(videoID, quality = "hqdefault") {
+  return `https://img.youtube.com/vi/${videoID}/${quality}.jpg`;
 }
 
 function handleThumbnailClick(
@@ -201,8 +201,12 @@ function handleThumbnailClick(
   });
 }
 
-function toggleMute(id) {
-  chrome.tabs.sendMessage(id, { action: "toggleMute" });
+function toggleMute(id, isChecked) {
+  if (isChecked) {
+    chrome.tabs.sendMessage(id, { action: "muteTrack" });
+  } else {
+    chrome.tabs.sendMessage(id, { action: "unmuteTrack" });
+  }
 }
 
 function setVolume(id, volume) {
@@ -212,8 +216,26 @@ function setVolume(id, volume) {
   });
 }
 
-function togglePlay(id) {
-  chrome.tabs.sendMessage(id, { action: "togglePlayPause" });
+function setLockedVolume(tabElement, selectedTabs, volume) {
+  selectedTabs.forEach((tab) => {
+    if (tabElement === tab) return;
+
+    const total = 1.0;
+
+    const otherVolume = total - volume;
+    const otherVolumeSlider = tab.querySelector('input[type="range"]');
+    otherVolumeSlider.value = otherVolume;
+    const otherId = parseInt(tab.getAttribute("data-id"));
+    setVolume(otherId, otherVolume);
+  });
+}
+
+function togglePlay(id, isChecked) {
+  if (isChecked) {
+    chrome.tabs.sendMessage(id, { action: "setPlaying" });
+  } else {
+    chrome.tabs.sendMessage(id, { action: "setPaused" });
+  }
 }
 
 function createElement(

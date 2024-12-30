@@ -3,16 +3,21 @@ chrome.runtime.onMessage.addListener((message) => {
   if (!video) return;
 
   switch (message.action) {
-    case "toggleMute":
-      video.muted = !video.muted;
+    case "muteTrack":
+      video.muted = true;
       break;
-    case "togglePlayPause":
-      if (video.paused) {
-        video.play();
-      } else {
-        video.pause();
-      }
+    case "unmuteTrack":
+      video.muted = false;
       break;
+
+    case "setPlaying": {
+      video.play();
+      break;
+    }
+    case "setPaused": {
+      video.pause();
+      break;
+    }
     case "setVolume":
       video.volume = parseFloat(message.volume);
       break;
