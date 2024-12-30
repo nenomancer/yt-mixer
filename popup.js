@@ -80,6 +80,42 @@ document.addEventListener("DOMContentLoaded", () => {
           }, 1000);
 
           controlsContainer.appendChild(slider);
+
+          // Create the volume input range
+          const volumeSlider = createElement("input", ["volume"], {
+            type: "range",
+            "data-id": tab.id,
+            min: 0,
+            max: 1,
+            step: 0.005,
+            value: playbackInfo.volume,
+          });
+          controlsContainer.appendChild(volumeSlider);
+
+          const speedSlider = createElement("input", ["speed"], {
+            type: "range",
+            "data-id": tab.id,
+            min: 0.25,
+            max: 2,
+            step: 0.005,
+            value: playbackInfo.speed,
+          });
+          controlsContainer.appendChild(speedSlider);
+
+          volumeSlider.addEventListener("input", () => {
+            const volume = volumeSlider.value;
+            setVolume(tab.id, volume);
+
+            if (!lockVolume.checked) return;
+
+            setLockedVolume(tabElement, selectedTabs, volume);
+          });
+
+          speedSlider.addEventListener("input", () => {
+            const speed = speedSlider.value;
+            chrome.tabs.sendMessage(tab.id, { action: "setSpeed", speed });
+          });
+
           return true;
         }
       );
@@ -115,27 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       controlsContainer.appendChild(playPauseCheckbox);
 
-      // Create the volume input range
-      const volumeSlider = createElement("input", ["volume"], {
-        type: "range",
-        "data-id": tab.id,
-        min: 0,
-        max: 1,
-        step: 0.005,
-        value: 0.5,
-        disabled: true,
-      });
-      controlsContainer.appendChild(volumeSlider);
-      const speedSlider = createElement("input", ["speed"], {
-        type: "range",
-        "data-id": tab.id,
-        min: 0.25,
-        max: 2,
-        step: 0.005,
-        value: 1,
-      });
-      controlsContainer.appendChild(speedSlider);
-
       muteButton.addEventListener("change", () => {
         toggleMute(tab.id, muteButton.checked);
       });
@@ -154,20 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const otherId = parseInt(tab.getAttribute("data-id"));
           togglePlay(otherId, otherPlayPauseCheckbox.checked);
         });
-      });
-
-      volumeSlider.addEventListener("input", () => {
-        const volume = volumeSlider.value;
-        setVolume(tab.id, volume);
-
-        if (!lockVolume.checked) return;
-
-        setLockedVolume(tabElement, selectedTabs, volume);
-      });
-
-      speedSlider.addEventListener("input", () => {
-        const speed = speedSlider.value;
-        chrome.tabs.sendMessage(tab.id, { action: "setSpeed", speed });
       });
 
       // Append the controls container to the tab element
@@ -279,7 +280,7 @@ function setLockedVolume(tabElement, selectedTabs, volume) {
     const total = 1.0;
 
     const otherVolume = total - volume;
-    const otherVolumeSlider = tab.querySelector('input[type="range"]');
+    const otherVolumeSlider = tab.querySelector(".volume");
     otherVolumeSlider.value = otherVolume;
     const otherId = parseInt(tab.getAttribute("data-id"));
     setVolume(otherId, otherVolume);

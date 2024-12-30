@@ -25,15 +25,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       video.playbackRate = parseFloat(message.speed);
       break;
     case "getPlaybackInfo":
-      console.log("getting playback info..");
       sendResponse({
         currentTime: video.currentTime,
         duration: video.duration,
         title: document.title,
+        volume: video.volume,
+        speed: video.playbackRate,
       });
       break;
     case "seek":
-      console.log("SEEKING TO: ", message.time);
       video.currentTime = parseFloat(message.time);
       sendResponse({ success: true });
       break;
