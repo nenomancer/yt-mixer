@@ -1,0 +1,72 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: none;
+}
+
+#container {
+  width: 460px;
+}
+
+#tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+}
+
+.tab {
+  padding: 1rem 0.5rem;
+
+  &.audible::after {
+    content: "playing";
+    display: block;
+  }
+
+  &:nth-child(1) {
+    background-color: green;
+  }
+
+  &:nth-child(2) {
+    background-color: purple;
+  }
+
+  .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 0.5rem;
+  }
+}
+
+#thumbnails {
+  /* display: flex; */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.thumbnail {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  width: 100%;
+  padding: 0.5rem;
+  &[data-selected="0"] {
+    background-color: green;
+  }
+  &[data-selected="1"] {
+    background-color: purple;
+  }
+}
+
+.controls {
+  border: 1px solid orange;
+  width: fit-content;
+
+  input[type="range"][orient="vertical"] {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    appearance: slider-vertical;
+    width: 16px;
+    vertical-align: bottom;
+  }
+}
