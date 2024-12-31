@@ -1,0 +1,49 @@
+#thumbnails {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0.75rem;
+  gap: 0.25rem;
+}
+.thumbnail {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  opacity: 0.5;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &[data-selected] {
+    position: relative;
+    opacity: 1;
+    &::after {
+      content: "1";
+      position: absolute;
+      left: 0.25rem;
+      top: 0.25rem;
+      border-radius: 50%;
+      width: 24px;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  &[data-selected="0"] {
+    /* box-shadow: inset 0 0 0 1px green; */
+    &::after {
+      content: "1";
+      background-color: green;
+    }
+  }
+  &[data-selected="1"] {
+    /* box-shadow: inset 0 0 0 1px purple; */
+    &::after {
+      content: "2";
+      background-color: purple;
+    }
+  }
+}

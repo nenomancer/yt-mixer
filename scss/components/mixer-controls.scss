@@ -1,0 +1,46 @@
+#mixer-controls {
+  grid-area: mixer-controls;
+
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+
+  input[type="checkbox"] {
+    color: pink;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    appearance: none;
+    background-color: #eee;
+    padding: 0.5rem;
+    cursor: pointer;
+
+    &[id="lock-volume"] {
+      margin-top: 0.75rem;
+    }
+    &::after {
+      width: 1.25rem;
+      aspect-ratio: 1/1;
+    }
+    &:checked {
+      background-color: #555;
+      &::after {
+        background-color: yellow;
+      }
+    }
+    &::after {
+      content: "";
+      display: inline-block;
+      mask-image: $icon-link;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      mask-size: contain;
+
+      background-color: #333;
+      display: block;
+    }
+  }
+}
