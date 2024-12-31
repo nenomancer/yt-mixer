@@ -39,10 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
       setVolume(tab.id, 0.5);
       const videoID = getYouTubeVideoID(tab.url);
       const thumbnailURL = getYouTubeThumbnail(videoID);
-      const thumbnail = createElement("img", ["thumbnail", "select"], {
+      const thumbnail = createElement("div", ["thumbnail", "select"], {
         "data-thumb-id": tab.id,
         src: thumbnailURL,
       });
+      thumbnail.style.backgroundImage = `url(${thumbnailURL})`;
       thumbnailContainer.appendChild(thumbnail);
       const tabElement = createElement("div", ["tab"]);
       tabElement.setAttribute("data-id", tab.id);
@@ -119,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setSpeed(tab.id, speedSlider.value, speedSlider);
           });
 
-          const playbackSlider = createElement("input", ["playback-slider"], {
+          const playbackSlider = createElement("input", ["playback"], {
             type: "range",
             min: "0",
             max: playbackInfo.duration,
@@ -194,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
         type: "checkbox",
         "data-id": tab.id,
         id: `mute-${tab.id}`,
-        "data-content": "Mute",
       });
 
       controlsContainer.appendChild(muteCheckbox);
@@ -203,7 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const playPauseCheckbox = createElement("input", ["playpause"], {
         type: "checkbox",
         id: `playpause-${tab.id}`,
-        "data-content": "Play/Pause",
       });
       controlsContainer.appendChild(playPauseCheckbox);
 
