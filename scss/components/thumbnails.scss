@@ -3,6 +3,17 @@
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 0.75rem;
   gap: 0.5rem;
+
+  &:focus {
+    .thumbnail {
+      opacity: 1;
+      filter: grayscale(0);
+      &::after {
+        content: attr(data-order-id);
+        background-color: blue;
+      }
+    }
+  }
 }
 .thumbnail {
   aspect-ratio: 1/1;
@@ -24,35 +35,34 @@
     filter: grayscale(0.5);
   }
 
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0.25rem;
+    top: 0.25rem;
+    border-radius: 50%;
+    width: 1rem;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &[data-selected] {
     position: relative;
     opacity: 1;
     filter: grayscale(0);
-
-    &::after {
-      content: "";
-      position: absolute;
-      left: 0.25rem;
-      top: 0.25rem;
-      border-radius: 50%;
-      width: 1rem;
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
   }
   &[data-selected="0"] {
     &::after {
-      // content: "1";
       background-color: $color-first-track;
       @include glow($color-first-track);
     }
   }
   &[data-selected="1"] {
     &::after {
-      // content: "2";
       background-color: $color-second-track;
+      @include glow($color-second-track);
     }
   }
 }

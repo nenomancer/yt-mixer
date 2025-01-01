@@ -1,18 +1,77 @@
+// import {
+//   createElement,
+//   formatTime,
+//   getYouTubeThumbnail,
+//   getYouTubeVideoID,
+//   handleTabs,
+//   handleThumbnailClick,
+//   setLockedVolume,
+//   setSpeed,
+//   setVolume,
+//   toggleMute,
+//   togglePlay,
+// } from "./helpers";
+
 document.addEventListener("DOMContentLoaded", () => {
   const tabsContainer = document.getElementById("tracks");
   const thumbnailContainer = document.getElementById("thumbnails");
   const lockVolume = document.getElementById("lock-volume");
   const lockPlayPause = document.getElementById("lock-playpause");
   let isDragging = false;
+  let isLoadingMode = false;
 
   const selectedTabs = [];
   const selectedThumbnails = [];
+  const keysPressed = {};
 
   chrome.runtime.sendMessage({ action: "getYouTubeTabs" }, (response) => {
     const tabs = response.tabs;
     if (!tabs || tabs.length === 0) {
       return;
     }
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key.toLowerCase();
+      const isShiftPressed = event.shiftKey;
+
+      keysPressed[key] = true;
+
+      console.log("is v pressed: ", keysPressed["v"]);
+      console.log("is 1 pressed: ", keysPressed["1"]);
+      console.log(
+        "are they both pressed: ",
+        keysPressed["v"] && keysPressed["1"]
+      );
+
+      const shortcutLoadingMode = isShiftPressed && key === "l";
+
+      if (isLoadingMode) {
+        if (shortcutLoadingMode) {
+          isLoadingMode = false;
+          thumbnailContainer.blur();
+          console.log("Exiting loading mode");
+        } else if (key >= "1" && key <= tabs.length) {
+          const index = Number(key) - 1;
+          handleThumbnailClick(
+            tabs[index].thumbnail,
+            tabs[index].element,
+            selectedThumbnails,
+            selectedTabs
+          );
+        }
+      } else {
+        if (shortcutLoadingMode) {
+          console.log("Entering loading mode. Presse esxapoe");
+          isLoadingMode = true;
+          thumbnailContainer.focus();
+        }
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      const key = event.key.toLowerCase();
+      keysPressed[key] = false;
+    });
 
     lockVolume.addEventListener("change", () => {
       // if first selected is playing (get playing state)
@@ -34,13 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    tabs.forEach((tab) => {
+    tabs.forEach((tab, index) => {
       togglePlay(tab.id, false);
       setVolume(tab.id, 0.5);
       const videoID = getYouTubeVideoID(tab.url);
       const thumbnailURL = getYouTubeThumbnail(videoID);
       const thumbnail = createElement("div", ["thumbnail", "select"], {
         "data-thumb-id": tab.id,
+        "data-order-id": index + 1,
         src: thumbnailURL,
       });
       thumbnail.style.backgroundImage = `url(${thumbnailURL})`;
@@ -229,6 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Append the controls container to the tab element
       tabElement.appendChild(controlsContainer);
 
+      tab.element = tabElement;
+      tab.thumbnail = thumbnail;
       // Now append tabElement to the tabsContainer
       tabsContainer.appendChild(tabElement);
     });
