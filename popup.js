@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const tabsContainer = document.getElementById("tabs");
+  const tabsContainer = document.getElementById("tracks");
   const thumbnailContainer = document.getElementById("thumbnails");
   const lockVolume = document.getElementById("lock-volume");
   const lockPlayPause = document.getElementById("lock-playpause");
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       thumbnail.style.backgroundImage = `url(${thumbnailURL})`;
       thumbnailContainer.appendChild(thumbnail);
-      const tabElement = createElement("div", ["tab"]);
+      const tabElement = createElement("div", ["track"]);
       tabElement.setAttribute("data-id", tab.id);
       tabElement.tabIndex = 0;
 

@@ -8,15 +8,18 @@
 }
 
 #container {
-  width: 460px;
-  padding: 0.5rem;
+  width: 480px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: #333;
 }
 
 #thumbnails {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 0.75rem;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .thumbnail {
@@ -28,39 +31,40 @@
   border-radius: 0.25rem;
   overflow: hidden;
   opacity: 0.5;
+  filter: grayscale(1);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  transition: filter 250ms ease-in-out;
+  box-shadow: inset 0 0 4px 2px rgba(255, 255, 255, 0.2);
+}
+.thumbnail:hover {
+  filter: grayscale(0.5);
 }
 .thumbnail[data-selected] {
   position: relative;
   opacity: 1;
+  filter: grayscale(0);
 }
 .thumbnail[data-selected]::after {
-  content: "1";
+  content: "";
   position: absolute;
   left: 0.25rem;
   top: 0.25rem;
   border-radius: 50%;
-  width: 24px;
+  width: 1rem;
   aspect-ratio: 1/1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.thumbnail[data-selected="0"] {
-  /* box-shadow: inset 0 0 0 1px green; */
-}
 .thumbnail[data-selected="0"]::after {
-  content: "1";
   background-color: green;
-}
-.thumbnail[data-selected="1"] {
-  /* box-shadow: inset 0 0 0 1px purple; */
+  background: radial-gradient(circle at center, #80ff80 0%, green 120%);
+  box-shadow: 0 0 4px 2px rgba(0, 128, 0, 0.75), 0 0 10px 0 rgba(0, 128, 0, 0.5);
 }
 .thumbnail[data-selected="1"]::after {
-  content: "2";
-  background-color: purple;
+  background-color: red;
 }
 
 #mixer-controls {
@@ -124,10 +128,24 @@
 #tracks [id*=placeholder-] {
   border-radius: 0.25rem;
   overflow: hidden;
-  box-shadow: inset 0 0 0.25rem 0.25rem rgba(0, 0, 0, 0.3);
+  box-shadow: inset 2px 2px 2px 0 rgba(255, 255, 255, 0.1), inset -2px -2px 2px 0 rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  color: #eee;
+  font-weight: bold;
+  text-align: center;
+}
+#tracks [id*=placeholder-]::before {
+  content: "";
+  width: 1rem;
+  height: 0.25rem;
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
+  background: radial-gradient(circle at center, #b3b3b3 0%, #333 120%);
+  box-shadow: 0 0 4px 2px rgba(51, 51, 51, 0.75), 0 0 10px 0 rgba(51, 51, 51, 0.5);
 }
 #tracks [id*=placeholder-] img {
   width: 100%;
@@ -141,30 +159,43 @@
 
 .track {
   /* padding: 1rem 0.5rem; */
-  padding: 0.25rem;
+  padding: 0.5rem;
   display: none;
   border-radius: 0.25rem;
-  overflow: hidden;
+  background-color: #333;
 }
 .track[data-selected] {
   display: flex;
   flex-direction: column;
+  position: relative;
+  box-shadow: inset 2px 2px 2px 0 rgba(255, 255, 255, 0.1), inset -2px -2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+.track[data-selected]::before {
+  content: "";
+  width: 1rem;
+  height: 0.25rem;
+  position: absolute;
+  top: 0;
+  left: 0.5rem;
 }
 .track[data-selected="0"] {
-  background-color: green;
-  box-shadow: inset 0 0 0 1px green;
   grid-area: track-1;
   position: relative;
   /* order: -1; */
+}
+.track[data-selected="0"]::before {
+  background: radial-gradient(circle at center, #80ff80 0%, green 120%);
+  box-shadow: 0 0 4px 2px rgba(0, 128, 0, 0.75), 0 0 10px 0 rgba(0, 128, 0, 0.5);
 }
 .track[data-selected="0"] .controls input[type=checkbox][class=playpause] {
   grid-area: play-1;
 }
 .track[data-selected="1"] {
-  background-color: purple;
-  box-shadow: inset 0 0 0 1px purple;
   grid-area: track-2;
-  position: relative;
+}
+.track[data-selected="1"]::before {
+  background: radial-gradient(circle at center, white 0%, red 120%);
+  box-shadow: 0 0 4px 2px rgba(255, 0, 0, 0.75), 0 0 10px 0 rgba(255, 0, 0, 0.5);
 }
 .track[data-selected="1"] .controls input[type=checkbox][class=playpause] {
   grid-area: play-2;
@@ -177,16 +208,16 @@
 }
 
 .controls {
-  display: flex;
-  flex-direction: column;
   flex: 1;
-  background-color: grey;
+  background-color: #2b2b2b;
+  box-shadow: inset 0 0 4px 2px #1a1a1a;
   border-radius: 0.25rem;
   overflow: hidden;
   display: grid;
   grid-template-areas: "play-2 mute play-1" "volume volume volume" "speed speed speed" "playback playback playback";
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);
+  place-items: center;
 }
 .controls input[type=checkbox][class=playpause],
 .controls input[type=checkbox][class=mute] {
@@ -267,12 +298,12 @@
   height: 1rem;
   /* aspect-ratio: 1/1; */
   width: var(--width);
-  background-color: #333;
+  background-color: #3b3b3b;
   cursor: pointer;
   transform: translateY(-44%);
 }
 .controls input[type=range]::-webkit-slider-runnable-track {
-  background-color: #333;
+  background-color: #1a1a1a;
   height: 0.15rem;
   cursor: pointer;
   margin-inline: 0.5rem;
