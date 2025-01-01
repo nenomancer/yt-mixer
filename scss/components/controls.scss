@@ -68,8 +68,14 @@
     -webkit-appearance: none;
     width: 100%;
     height: 1.5rem;
-    align-self: flex-end;
+    align-self: center;
     background-color: transparent;
+    display: flex;
+    align-items: center;
+
+    &::before {
+      padding-left: 0.5rem;
+    }
 
     &::-webkit-slider-thumb {
       --width: 0.15rem;
@@ -81,12 +87,12 @@
       background-color: #333;
       cursor: pointer;
       transform: translateY(-44%);
-      box-shadow: calc(var(--width) * -1) 0 0 0 var(--color),
-        calc(var(--width) * -2) 0 0 0 var(--color),
-        calc(var(--width) * -3) 0 0 0 var(--color),
-        var(--width) 0 0 0 var(--color),
-        calc(var(--width) * 2) 0 0 0 var(--color),
-        calc(var(--width) * 3) 0 0 0 var(--color);
+      // box-shadow: calc(var(--width) * -1) 0 0 0 var(--color),
+      //   calc(var(--width) * -2) 0 0 0 var(--color),
+      //   calc(var(--width) * -3) 0 0 0 var(--color),
+      //   var(--width) 0 0 0 var(--color),
+      //   calc(var(--width) * 2) 0 0 0 var(--color),
+      //   calc(var(--width) * 3) 0 0 0 var(--color);
     }
 
     &::-webkit-slider-runnable-track {
@@ -99,22 +105,31 @@
   }
   input[type="range"][class="volume"] {
     grid-area: volume;
+    &::before {
+      content: "VOL";
+    }
   }
   input[type="range"][class="speed"] {
     grid-area: speed;
+    &::before {
+      content: "RPM";
+    }
   }
   input[type="range"][class="playback"] {
     grid-area: playback;
+    &::before {
+      content: "SEK";
+    }
   }
   [data-content] {
-    position: relative;
+    // position: relative;
     /* padding-block: 0.5rem; */
     &::before {
-      content: attr(data-content);
-      position: absolute;
-      top: -60%;
-      left: 50%;
-      translate: -50% 0;
+      // content: attr(data-content);
+      // position: absolute;
+      // top: -60%;
+      // left: 50%;
+      // translate: -50% 0;
     }
   }
   input,

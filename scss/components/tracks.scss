@@ -1,7 +1,7 @@
 #tracks {
   display: grid;
   /* grid-template-columns: repeat(2, 50%); */
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(2, 1fr) 0.5fr repeat(2, 1fr);
   grid-template-rows: repeat(2, 6rem);
   grid-template-areas:
     "track-1 track-1 mixer-controls track-2 track-2"

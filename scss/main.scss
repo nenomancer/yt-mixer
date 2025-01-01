@@ -9,17 +9,3 @@
 
 @import "components/tracks.scss";
 @import "components/controls.scss";
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  scrollbar-width: none;
-}
-
-#container {
-  width: 460px;
-  padding: 0.5rem;
-}

@@ -70,6 +70,7 @@
   justify-content: center;
   align-items: center;
   margin-top: 1.5rem;
+  margin-bottom: 0.25rem;
 }
 #mixer-controls input[type=checkbox] {
   color: pink;
@@ -81,13 +82,15 @@
           appearance: none;
   background-color: #eee;
   padding: 0.5rem;
+  border-radius: 50%;
+  justify-self: center;
   cursor: pointer;
 }
 #mixer-controls input[type=checkbox][id=lock-volume] {
-  margin-top: 0.75rem;
+  align-self: flex-end;
 }
 #mixer-controls input[type=checkbox]::after {
-  width: 1.25rem;
+  width: 1rem;
   aspect-ratio: 1/1;
 }
 #mixer-controls input[type=checkbox]:checked {
@@ -114,7 +117,7 @@
 #tracks {
   display: grid;
   /* grid-template-columns: repeat(2, 50%); */
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(2, 1fr) 0.5fr repeat(2, 1fr);
   grid-template-rows: repeat(2, 6rem);
   grid-template-areas: "track-1 track-1 mixer-controls track-2 track-2" "track-1 track-1 mixer-controls track-2 track-2";
 }
@@ -248,8 +251,13 @@
   -webkit-appearance: none;
   width: 100%;
   height: 1.5rem;
-  align-self: flex-end;
+  align-self: center;
   background-color: transparent;
+  display: flex;
+  align-items: center;
+}
+.controls input[type=range]::before {
+  padding-left: 0.5rem;
 }
 .controls input[type=range]::-webkit-slider-thumb {
   --width: 0.15rem;
@@ -262,7 +270,6 @@
   background-color: #333;
   cursor: pointer;
   transform: translateY(-44%);
-  box-shadow: calc(var(--width) * -1) 0 0 0 var(--color), calc(var(--width) * -2) 0 0 0 var(--color), calc(var(--width) * -3) 0 0 0 var(--color), var(--width) 0 0 0 var(--color), calc(var(--width) * 2) 0 0 0 var(--color), calc(var(--width) * 3) 0 0 0 var(--color);
 }
 .controls input[type=range]::-webkit-slider-runnable-track {
   background-color: #333;
@@ -274,38 +281,25 @@
 .controls input[type=range][class=volume] {
   grid-area: volume;
 }
+.controls input[type=range][class=volume]::before {
+  content: "VOL";
+}
 .controls input[type=range][class=speed] {
   grid-area: speed;
+}
+.controls input[type=range][class=speed]::before {
+  content: "RPM";
 }
 .controls input[type=range][class=playback] {
   grid-area: playback;
 }
-.controls [data-content] {
-  position: relative;
-  /* padding-block: 0.5rem; */
+.controls input[type=range][class=playback]::before {
+  content: "SEK";
 }
-.controls [data-content]::before {
-  content: attr(data-content);
-  position: absolute;
-  top: -60%;
-  left: 50%;
-  translate: -50% 0;
+.controls [data-content] {
+  /* padding-block: 0.5rem; */
 }
 .controls input,
 .controls button {
   cursor: pointer;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  scrollbar-width: none;
-}
-
-#container {
-  width: 460px;
-  padding: 0.5rem;
 }/*# sourceMappingURL=main.css.map */
