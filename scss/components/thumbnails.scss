@@ -1,0 +1,58 @@
+#thumbnails {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+}
+.thumbnail {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  opacity: 0.5;
+  filter: grayscale(1);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: filter $anim-normal;
+
+  box-shadow: inset 0 0 4px 2px rgba(white, 0.2);
+
+  &:hover {
+    filter: grayscale(0.5);
+  }
+
+  &[data-selected] {
+    position: relative;
+    opacity: 1;
+    filter: grayscale(0);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0.25rem;
+      top: 0.25rem;
+      border-radius: 50%;
+      width: 1rem;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  &[data-selected="0"] {
+    &::after {
+      // content: "1";
+      background-color: $color-first-track;
+      @include glow($color-first-track);
+    }
+  }
+  &[data-selected="1"] {
+    &::after {
+      // content: "2";
+      background-color: $color-second-track;
+    }
+  }
+}

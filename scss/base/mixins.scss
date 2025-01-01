@@ -1,0 +1,8 @@
+@mixin glow($color: orange) {
+  background: radial-gradient(
+    circle at center,
+    lighten($color, 50) 0%,
+    $color 120%
+  );
+  box-shadow: 0 0 4px 2px rgba($color, 0.75), 0 0 10px 0 rgba($color, 0.5);
+}

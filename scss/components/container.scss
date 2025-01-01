@@ -1,0 +1,16 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: none;
+}
+
+#container {
+  width: 480px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: $color-faceplate;
+}
