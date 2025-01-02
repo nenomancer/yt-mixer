@@ -17,30 +17,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const thumbnailContainer = document.getElementById("thumbnails");
   const lockVolume = document.getElementById("lock-volume");
   const lockPlayPause = document.getElementById("lock-playpause");
-  let isDragging = false;
+  let isScrubbingTimeline = false;
   let isLoadingMode = false;
+  let isScrolling = false;
 
   const selectedTabs = [];
   const selectedThumbnails = [];
   const keysPressed = {};
 
-  const setupKeyListeners = (tabs) => {
+  const setupKeyListeners = (tabs, index) => {
     document.addEventListener("keydown", (event) => {
       const key = event.key.toLowerCase();
       keysPressed[key] = true;
 
-      const isShiftPressed = event.shiftKey;
-      const shortcutLoadingMode = isShiftPressed && key === "l";
+      const shortcutLoadingMode = keysPressed["shift"] && keysPressed["l"];
 
       if (isLoadingMode) {
         if (shortcutLoadingMode) {
           isLoadingMode = false;
           thumbnailContainer.blur();
         } else if (key >= "1" && key <= tabs.length) {
-          const index = Number(key) - 1;
+          const tabIndex = Number(key) - 1;
           handleThumbnailClick(
-            tabs[index].thumbnail,
-            tabs[index].element,
+            tabs[tabIndex].thumbnail,
+            tabs[tabIndex].element,
             selectedThumbnails,
             selectedTabs
           );
@@ -51,6 +51,24 @@ document.addEventListener("DOMContentLoaded", () => {
           thumbnailContainer.focus();
         }
       }
+      console.log("keys presssed: ", keysPressed);
+    });
+
+    document.addEventListener("wheel", (event) => {
+      const value = parseFloat(event.deltaY) * 0.1;
+      if (keysPressed["v"]) {
+        // tabs[index].element.querySelector(".volume").value += value;
+        selectedTabs.forEach((tab) => {
+          console.log("tab: ", tab);
+          const valueToAdd =
+            parseFloat(tab.querySelector(".volume").value) + value;
+          console.log("adding value: ", valueToAdd);
+          console.log("current value: ", tab.querySelector(".volume").value);
+          setVolume(tab.getAttribute("data-id"), valueToAdd, tab);
+        });
+      }
+      console.log("Scrolling....");
+      console.log(event);
     });
 
     document.addEventListener("keyup", (event) => {
@@ -96,6 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    tab.volumeSlider = volumeSlider;
+
     controlsContainer.appendChild(volumeSlider);
 
     const speedSlider = createElement("input", ["speed"], {
@@ -124,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     playbackSlider.addEventListener("input", () => {
-      isDragging = true;
+      isScrubbingTimeline = true;
       playbackSlider.setAttribute(
         "data-content",
         `${formatTime(playbackSlider.value)} / ${formatTime(
@@ -138,11 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     playbackSlider.addEventListener("change", () => {
-      isDragging = false;
+      isScrubbingTimeline = false;
     });
 
     setInterval(() => {
-      if (!isDragging) {
+      if (!isScrubbingTimeline) {
         chrome.tabs.sendMessage(
           tab.id,
           { action: "getPlaybackInfo" },
