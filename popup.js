@@ -36,20 +36,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       keysPressed[key] = true;
 
-      console.log("is v pressed: ", keysPressed["v"]);
-      console.log("is 1 pressed: ", keysPressed["1"]);
-      console.log(
-        "are they both pressed: ",
-        keysPressed["v"] && keysPressed["1"]
-      );
-
       const shortcutLoadingMode = isShiftPressed && key === "l";
 
       if (isLoadingMode) {
         if (shortcutLoadingMode) {
           isLoadingMode = false;
           thumbnailContainer.blur();
-          console.log("Exiting loading mode");
         } else if (key >= "1" && key <= tabs.length) {
           const index = Number(key) - 1;
           handleThumbnailClick(
@@ -61,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } else {
         if (shortcutLoadingMode) {
-          console.log("Entering loading mode. Presse esxapoe");
           isLoadingMode = true;
           thumbnailContainer.focus();
         }
@@ -94,8 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     tabs.forEach((tab, index) => {
-      togglePlay(tab.id, false);
-      setVolume(tab.id, 0.5);
       const videoID = getYouTubeVideoID(tab.url);
       const thumbnailURL = getYouTubeThumbnail(videoID);
       const thumbnail = createElement("div", ["thumbnail", "select"], {
@@ -107,9 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
       thumbnailContainer.appendChild(thumbnail);
       const tabElement = createElement("div", ["track"]);
       tabElement.setAttribute("data-id", tab.id);
-      tabElement.tabIndex = 0;
+      tabElement.tabIndex = -1;
 
       thumbnail.addEventListener("click", (e) => {
+        thumbnailContainer.blur();
+
         handleThumbnailClick(
           thumbnail,
           tabElement,
@@ -243,12 +234,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      const title = createElement(
-        "h4",
-        ["title"],
-        {},
-        tab.title.replace(/- YouTube$/, "")
-      );
+      const title = createElement("h4", ["title"], {
+        "data-content": tab.title.replace(/- YouTube$/, ""),
+      });
+
       tabElement.appendChild(title);
       // Create the mute button
       const muteCheckbox = createElement("input", ["mute"], {
@@ -267,11 +256,11 @@ document.addEventListener("DOMContentLoaded", () => {
       controlsContainer.appendChild(playPauseCheckbox);
 
       muteCheckbox.addEventListener("change", () => {
-        toggleMute(tab.id, muteCheckbox.checked);
+        toggleMute(tab.id, muteCheckbox.checked, tabElement);
       });
 
       playPauseCheckbox.addEventListener("change", () => {
-        togglePlay(tab.id, playPauseCheckbox.checked);
+        togglePlay(tab.id, playPauseCheckbox.checked, tabElement);
 
         if (!lockPlayPause.checked) return;
 
@@ -282,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
           otherPlayPauseCheckbox.checked = playPauseCheckbox.checked;
 
           const otherId = parseInt(tab.getAttribute("data-id"));
-          togglePlay(otherId, otherPlayPauseCheckbox.checked);
+          togglePlay(otherId, otherPlayPauseCheckbox.checked, tab);
         });
       });
 
@@ -420,10 +409,12 @@ function setLockedVolume(tabElement, selectedTabs, volume) {
   });
 }
 
-function togglePlay(id, isChecked) {
+function togglePlay(id, isChecked, element) {
   if (isChecked) {
+    element.setAttribute("data-playing", true);
     chrome.tabs.sendMessage(id, { action: "setPlaying" });
   } else {
+    element.removeAttribute("data-playing");
     chrome.tabs.sendMessage(id, { action: "setPaused" });
   }
 }

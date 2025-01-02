@@ -3,19 +3,25 @@
   grid-template-columns: repeat(4, 1fr);
   margin-bottom: 0.75rem;
   gap: 0.5rem;
+  pointer-events: none;
+  background-color: darken($color-faceplate, 5);
+  padding: 0.5rem;
 
-  &:focus {
+  &:focus-visible {
+    outline: none;
     .thumbnail {
       opacity: 1;
       filter: grayscale(0);
       &::after {
         content: attr(data-order-id);
-        background-color: blue;
+        @include blinking-glow();
       }
     }
   }
 }
+
 .thumbnail {
+  pointer-events: all;
   aspect-ratio: 1/1;
   object-fit: cover;
   width: 100%;
