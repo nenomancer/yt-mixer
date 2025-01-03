@@ -94,6 +94,7 @@ export function toggleMute(id, isChecked) {
 export function setVolume(id, volume, element) {
   if (element) {
     element.setAttribute("data-content", `Volume: ${volume}`);
+    element.value = volume;
   }
   chrome.tabs.sendMessage(id, {
     action: "setVolume",
@@ -107,9 +108,9 @@ export function setSpeed(id, speed, element) {
   chrome.tabs.sendMessage(id, { action: "setSpeed", speed });
 }
 
-export function setLockedVolume(tabElement, selectedTabs, volume) {
+export function setLockedVolume(mainTabElement, selectedTabs, volume) {
   selectedTabs.forEach((tab) => {
-    if (tabElement === tab) return;
+    if (mainTabElement === tab) return;
 
     const total = 1.0;
 

@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
       keysPressed[key] = true;
 
       const shortcutLoadingMode = keysPressed["shift"] && keysPressed["l"];
+      const shortcutLockVolume = keysPressed["l"] && keysPressed["v"];
 
       if (isLoadingMode) {
         if (shortcutLoadingMode) {
@@ -50,30 +51,56 @@ document.addEventListener("DOMContentLoaded", () => {
           isLoadingMode = true;
           thumbnailContainer.focus();
         }
+        if (shortcutLockVolume) {
+          lockVolume.checked = !lockVolume.checked;
+        }
       }
       console.log("keys presssed: ", keysPressed);
     });
 
     document.addEventListener("wheel", (event) => {
-      const value = parseFloat(event.deltaY) * 0.1;
+      if (isLoadingMode) return;
+      const normalize = keysPressed["shift"] ? 0.001 : 0.01;
+      const value = parseFloat(event.deltaY) * normalize;
+      let tabsToAdjust;
+
       if (keysPressed["v"]) {
-        // tabs[index].element.querySelector(".volume").value += value;
-        selectedTabs.forEach((tab) => {
-          console.log("tab: ", tab);
-          const valueToAdd =
-            parseFloat(tab.querySelector(".volume").value) + value;
-          console.log("adding value: ", valueToAdd);
-          console.log("current value: ", tab.querySelector(".volume").value);
-          setVolume(tab.getAttribute("data-id"), valueToAdd, tab);
+        if (lockVolume.checked) {
+          setLockedVolume(
+            selectedTabs[0],
+            selectedTabs,
+            selectedTabs[0].querySelector(".volume").value
+          );
+        }
+        if (keysPressed["1"] || keysPressed["!"]) {
+          tabsToAdjust = [selectedTabs[0]];
+        } else if (keysPressed["2"] || keysPressed["@"]) {
+          tabsToAdjust = [selectedTabs[1]];
+        } else {
+          tabsToAdjust = selectedTabs;
+        }
+
+        tabsToAdjust?.forEach((tab) => {
+          if (!tab) return;
+
+          const volumeElement = tab.querySelector(".volume");
+          const currentVolume = parseFloat(volumeElement.value);
+          const newVolume = currentVolume + value;
+
+          setVolume(
+            Number(tab.getAttribute("data-id")),
+            newVolume,
+            volumeElement
+          );
         });
       }
-      console.log("Scrolling....");
-      console.log(event);
     });
 
     document.addEventListener("keyup", (event) => {
       keysPressed[event.key.toLowerCase()] = false;
     });
+
+    thumbnailContainer.addEventListener("blur", () => (isLoadingMode = false));
   };
 
   const syncVolumeSliders = (tabs) => {

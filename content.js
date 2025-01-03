@@ -41,8 +41,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case "getMutedState":
       sendResponse(video.muted);
+      break;
     case "getPlayingState":
       sendResponse(!video.paused);
+      break;
     case "seek":
       video.currentTime = parseFloat(message.time);
       sendResponse({ success: true });
