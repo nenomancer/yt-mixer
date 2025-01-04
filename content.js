@@ -30,6 +30,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "setSpeed":
       video.playbackRate = parseFloat(message.speed);
       break;
+    case "setPlaybackInfo":
+      message.play && video.play();
+      message.pause && video.pause();
+      video.volume = parseFloat(message.volume) || video.volume;
+      video.playbackRate = parseFloat(message.speed) || video.playbackRate;
+      video.muted = message.mute || video.muted;
+      video.unmuted = message.unmute || video.unmuted;
+      video.currentTime = parseFloat(message.time) || video.currentTime;
+      break;
     case "getPlaybackInfo":
       sendResponse({
         currentTime: video.currentTime,
@@ -37,13 +46,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         title: document.title,
         volume: video.volume,
         speed: video.playbackRate,
+        isMuted: video.muted,
+        isPlaying: !video.paused,
       });
-      break;
-    case "getMutedState":
-      sendResponse(video.muted);
-      break;
-    case "getPlayingState":
-      sendResponse(!video.paused);
       break;
     case "seek":
       video.currentTime = parseFloat(message.time);

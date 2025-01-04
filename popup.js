@@ -155,7 +155,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     speedSlider.addEventListener("input", () => {
-      setSpeed(tab.id, speedSlider.value, speedSlider);
+      setSpeed(
+        tab.id,
+        keysPressed["ctrl"] || keysPressed["meta"] ? 1.0 : speedSlider.value,
+        speedSlider
+      );
     });
 
     controlsContainer.appendChild(speedSlider);
@@ -214,10 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "checkbox",
       id: `mute-${tab.id}`,
     });
-
-    chrome.tabs.sendMessage(tab.id, { action: "getMutedState" }, (isMuted) => {
-      muteCheckbox.checked = isMuted;
-    });
+    muteCheckbox.checked = playbackInfo.isMuted;
 
     muteCheckbox.addEventListener("change", () => {
       toggleMute(tab.id, muteCheckbox.checked, tab.element);
@@ -229,15 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "checkbox",
       id: `playpause-${tab.id}`,
     });
-
-    chrome.tabs.sendMessage(
-      tab.id,
-      { action: "getPlayingState" },
-      (isPlaying) => {
-        playPauseCheckbox.checked = isPlaying;
-        togglePlay(tab.id, isPlaying, tab.element);
-      }
-    );
+    playPauseCheckbox.checked = playbackInfo.isPlaying;
+    togglePlay(tab.id, playbackInfo.isPlaying, tab.element);
 
     playPauseCheckbox.addEventListener("change", () => {
       togglePlay(tab.id, playPauseCheckbox.checked, tab.element);
@@ -300,6 +294,12 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getPlaybackInfo" },
         (playbackInfo) => {
+          const title = createElement("h4", ["title"], {
+            "data-content": tab.title
+              .replace(/- YouTube$/, "")
+              .replace(/^\(\d+\)\s*/, ""),
+          });
+          tabElement.appendChild(title);
           const controlsContainer = createControls(tab, playbackInfo);
           tabElement.appendChild(controlsContainer);
         }

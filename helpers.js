@@ -105,7 +105,7 @@ export function setVolume(id, volume, element) {
 export function setSpeed(id, speed, element) {
   element.value = speed;
   element.setAttribute("data-content", `Speed: ${element.value}`);
-  chrome.tabs.sendMessage(id, { action: "setSpeed", speed });
+  chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", speed });
 }
 
 export function setLockedVolume(mainTabElement, selectedTabs, volume) {
@@ -125,10 +125,10 @@ export function setLockedVolume(mainTabElement, selectedTabs, volume) {
 export function togglePlay(id, isChecked, element) {
   if (isChecked) {
     element.setAttribute("data-playing", true);
-    chrome.tabs.sendMessage(id, { action: "setPlaying" });
+    chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", play: true });
   } else {
     element.removeAttribute("data-playing");
-    chrome.tabs.sendMessage(id, { action: "setPaused" });
+    chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", pause: true });
   }
 }
 
