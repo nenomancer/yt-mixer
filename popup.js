@@ -32,6 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const shortcutLoadingMode = keysPressed["shift"] && keysPressed["l"];
       const shortcutLockVolume = keysPressed["l"] && keysPressed["v"];
+      const shortcutFirstTrack = keysPressed["1"] || keysPressed["!"];
+      const shortcutSecondTrack = keysPressed["2"] || keysPressed["@"];
+      const shortcutBothTracks = shortcutFirstTrack && shortcutSecondTrack;
 
       if (isLoadingMode) {
         if (shortcutLoadingMode) {
@@ -47,6 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         }
       } else {
+        if (shortcutFirstTrack) {
+          selectedTabs[0]?.classList.add("focused");
+        } else {
+          selectedTabs[0]?.classList.remove("focused");
+        }
+        if (shortcutSecondTrack) {
+          selectedTabs[1]?.classList.add("focused");
+        } else {
+          selectedTabs[1]?.classList.remove("focused");
+        }
         if (shortcutLoadingMode) {
           isLoadingMode = true;
           thumbnailContainer.focus();
@@ -55,16 +68,30 @@ document.addEventListener("DOMContentLoaded", () => {
           lockVolume.checked = !lockVolume.checked;
         }
       }
-      console.log("keys presssed: ", keysPressed);
     });
 
     document.addEventListener("wheel", (event) => {
       if (isLoadingMode) return;
       const normalize = keysPressed["shift"] ? 0.001 : 0.01;
       const value = parseFloat(event.deltaY) * normalize;
+
+      const shortcutFirstTrack = keysPressed["1"] || keysPressed["!"];
+      const shortcutSecondTrack = keysPressed["2"] || keysPressed["@"];
+      const shortcutBothTracks = shortcutFirstTrack && shortcutSecondTrack;
+
       let tabsToAdjust;
 
       if (keysPressed["v"]) {
+        if (shortcutBothTracks) {
+          tabsToAdjust = selectedTabs;
+        } else if (shortcutFirstTrack) {
+          tabsToAdjust = [selectedTabs[0]];
+        } else if (shortcutSecondTrack) {
+          tabsToAdjust = [selectedTabs[1]];
+        } else {
+          tabsToAdjust = selectedTabs;
+        }
+
         if (lockVolume.checked) {
           setLockedVolume(
             selectedTabs[0],
@@ -72,14 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedTabs[0].querySelector(".volume").value
           );
         }
-        if (keysPressed["1"] || keysPressed["!"]) {
-          tabsToAdjust = [selectedTabs[0]];
-        } else if (keysPressed["2"] || keysPressed["@"]) {
-          tabsToAdjust = [selectedTabs[1]];
-        } else {
-          tabsToAdjust = selectedTabs;
-        }
-
         tabsToAdjust?.forEach((tab) => {
           if (!tab) return;
 
@@ -98,6 +117,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("keyup", (event) => {
       keysPressed[event.key.toLowerCase()] = false;
+      selectedTabs[0]?.classList.remove("focused");
+      selectedTabs[1]?.classList.remove("focused");
     });
 
     thumbnailContainer.addEventListener("blur", () => (isLoadingMode = false));
@@ -123,6 +144,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const createControls = (tab, playbackInfo) => {
     const controlsContainer = createElement("div", ["controls"]);
+    controlsContainer.tabIndex = -1;
+
+    const muteCheckbox = createElement("input", ["mute"], {
+      type: "checkbox",
+      id: `mute-${tab.id}`,
+      tabIndex: -1,
+    });
+    muteCheckbox.checked = playbackInfo.isMuted;
+
+    muteCheckbox.addEventListener("change", () => {
+      toggleMute(tab.id, muteCheckbox.checked, tab.element);
+    });
+
+    controlsContainer.appendChild(muteCheckbox);
+
+    const playPauseCheckbox = createElement("input", ["playpause"], {
+      type: "checkbox",
+      id: `playpause-${tab.id}`,
+    });
+    playPauseCheckbox.checked = playbackInfo.isPlaying;
+    togglePlay(tab.id, playbackInfo.isPlaying, tab.element);
+
+    playPauseCheckbox.addEventListener("change", () => {
+      togglePlay(tab.id, playPauseCheckbox.checked, tab.element);
+
+      if (lockPlayPause.checked) {
+        selectedTabs.forEach((selectedTab) => {
+          if (tab.element === selectedTab) return;
+          const otherPlayPauseCheckbox =
+            selectedTab.querySelector(".playpause");
+          otherPlayPauseCheckbox.checked = playPauseCheckbox.checked;
+          togglePlay(
+            parseInt(selectedTab.getAttribute("data-id")),
+            playPauseCheckbox.checked,
+            selectedTab
+          );
+        });
+      }
+    });
+
+    controlsContainer.appendChild(playPauseCheckbox);
+
+    // Placeholder checkbox
+    const placeholderCheckbox = createElement("input", [], {
+      type: "checkbox",
+      id: `temporary-${tab.id}`,
+    });
+    placeholderCheckbox.checked = false;
+    placeholderCheckbox.disabled = true;
+    controlsContainer.appendChild(placeholderCheckbox);
 
     const volumeSlider = createElement("input", ["volume"], {
       type: "range",
@@ -213,45 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     controlsContainer.appendChild(playbackSlider);
-
-    const muteCheckbox = createElement("input", ["mute"], {
-      type: "checkbox",
-      id: `mute-${tab.id}`,
-    });
-    muteCheckbox.checked = playbackInfo.isMuted;
-
-    muteCheckbox.addEventListener("change", () => {
-      toggleMute(tab.id, muteCheckbox.checked, tab.element);
-    });
-
-    controlsContainer.appendChild(muteCheckbox);
-
-    const playPauseCheckbox = createElement("input", ["playpause"], {
-      type: "checkbox",
-      id: `playpause-${tab.id}`,
-    });
-    playPauseCheckbox.checked = playbackInfo.isPlaying;
-    togglePlay(tab.id, playbackInfo.isPlaying, tab.element);
-
-    playPauseCheckbox.addEventListener("change", () => {
-      togglePlay(tab.id, playPauseCheckbox.checked, tab.element);
-
-      if (lockPlayPause.checked) {
-        selectedTabs.forEach((selectedTab) => {
-          if (tab.element === selectedTab) return;
-          const otherPlayPauseCheckbox =
-            selectedTab.querySelector(".playpause");
-          otherPlayPauseCheckbox.checked = playPauseCheckbox.checked;
-          togglePlay(
-            parseInt(selectedTab.getAttribute("data-id")),
-            playPauseCheckbox.checked,
-            selectedTab
-          );
-        });
-      }
-    });
-
-    controlsContainer.appendChild(playPauseCheckbox);
 
     return controlsContainer;
   };
