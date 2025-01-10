@@ -33,21 +33,24 @@
 }
 #thumbnails:focus-visible .thumbnail::after {
   content: attr(data-order-id);
+  height: 1.5em;
   animation: blink 1.5s infinite;
   animation-fill-mode: both;
+  color: #0a0a0a;
+  font-weight: bold;
 }
 @keyframes blink {
   0% {
-    background: radial-gradient(circle at center, white 0%, orange 120%);
-    box-shadow: 0 0 4px 2px rgba(255, 165, 0, 0.75), 0 0 10px 0 rgba(255, 165, 0, 0.5);
+    background: radial-gradient(circle at center, white 0%, yellow 120%);
+    box-shadow: 0 0 4px 2px rgba(255, 255, 0, 0.75), 0 0 10px 0 rgba(255, 255, 0, 0.5), 0 0 0 0.25rem #333;
   }
   50% {
     background: radial-gradient(circle at center, #e6e6e6 0%, #666 120%);
-    box-shadow: 0 0 4px 2px rgba(102, 102, 102, 0.75), 0 0 10px 0 rgba(102, 102, 102, 0.5);
+    box-shadow: 0 0 4px 2px rgba(102, 102, 102, 0.75), 0 0 10px 0 rgba(102, 102, 102, 0.5), 0 0 0 0.25rem #333;
   }
   100% {
-    background: radial-gradient(circle at center, white 0%, orange 120%);
-    box-shadow: 0 0 4px 2px rgba(255, 165, 0, 0.75), 0 0 10px 0 rgba(255, 165, 0, 0.5);
+    background: radial-gradient(circle at center, white 0%, yellow 120%);
+    box-shadow: 0 0 4px 2px rgba(255, 255, 0, 0.75), 0 0 10px 0 rgba(255, 255, 0, 0.5), 0 0 0 0.25rem #333;
   }
 }
 
@@ -66,22 +69,29 @@
   background-position: center;
   background-repeat: no-repeat;
   transition: filter 250ms ease-in-out;
-  box-shadow: inset 0 0 4px 2px rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  border: 0.5rem solid #333;
 }
 .thumbnail:hover {
   filter: grayscale(0.5);
 }
 .thumbnail::after {
   content: "";
-  position: absolute;
-  left: 0.25rem;
-  top: 0.25rem;
-  border-radius: 50%;
-  width: 1rem;
-  aspect-ratio: 1/1;
+  border-radius: 0.15rem;
+  width: 1.5rem;
+  height: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: transparent;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  box-shadow: 0 0 0 0.25rem #333;
+  background-color: #adadad;
+  transition: height 250ms ease-in-out, color 250ms ease-in-out 150ms;
 }
 .thumbnail[data-selected] {
   position: relative;
@@ -91,52 +101,84 @@
 .thumbnail[data-selected="0"]::after {
   background-color: #00f5f3;
   background: radial-gradient(circle at center, #8ffffe 0%, #00f5f3 120%) !important;
-  box-shadow: 0 0 4px 2px rgba(0, 245, 243, 0.25), 0 0 10px 0 rgba(0, 245, 243, 0.5) !important;
+  box-shadow: 0 0 4px 2px rgba(0, 245, 243, 0.25), 0 0 10px 0 rgba(0, 245, 243, 0.5), 0 0 0 0.25rem #333 !important;
 }
 .thumbnail[data-selected="1"]::after {
   background-color: #f830ff;
   background: radial-gradient(circle at center, #fdc9ff 0%, #f830ff 120%) !important;
-  box-shadow: 0 0 4px 2px rgba(248, 48, 255, 0.25), 0 0 10px 0 rgba(248, 48, 255, 0.5) !important;
+  box-shadow: 0 0 4px 2px rgba(248, 48, 255, 0.25), 0 0 10px 0 rgba(248, 48, 255, 0.5), 0 0 0 0.25rem #333 !important;
 }
 
 #mixer-controls {
   grid-area: mixer-controls;
-  display: grid;
-  grid-template-rows: repeat(4, 1fr);
-  justify-content: center;
-  align-items: center;
-  margin-top: 1.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+#mixer-controls .title {
+  height: 2rem;
   margin-bottom: 0.25rem;
 }
+#mixer-controls div {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 #mixer-controls input[type=checkbox] {
-  color: pink;
   display: flex;
   justify-content: center;
   align-items: center;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  background-color: #eee;
+  background-color: #3d3d3d;
   padding: 0.5rem;
-  border-radius: 50%;
-  justify-self: center;
+  flex: 1;
+  box-shadow: 0 2px 2px 1px #0a0a0a, inset 0 0 1px 1px #0a0a0a, inset 0 0 0 4px #5c5c5c;
   cursor: pointer;
-}
-#mixer-controls input[type=checkbox][id=lock-volume] {
-  align-self: flex-end;
+  transition: all 250ms ease-in-out;
+  transition: all 250ms ease-in-out;
+  border-radius: 0.25rem;
 }
 #mixer-controls input[type=checkbox]::after {
-  width: 1rem;
+  width: 1.25rem;
   aspect-ratio: 1/1;
+  background-color: #333;
+  transition: all 250ms ease-in-out;
+}
+#mixer-controls input[type=checkbox]:hover {
+  color: #adad00;
+}
+#mixer-controls input[type=checkbox]:hover::after {
+  background: yellow;
+}
+#mixer-controls input[type=checkbox]:active #mixer-controls input[type=checkbox]:checked:active {
+  color: #ffff52;
+  background-color: #242424;
+  box-shadow: 0 0 1px 0 black, inset 0 0 1px 1px #0a0a0a, inset 0 0 0 4px #303030;
+}
+#mixer-controls input[type=checkbox]:active #mixer-controls input[type=checkbox]:checked:active::before {
+  color: yellow;
+}
+#mixer-controls input[type=checkbox]:active #mixer-controls input[type=checkbox]:checked:active::after {
+  background: yellow;
 }
 #mixer-controls input[type=checkbox]:checked {
-  background-color: #555;
+  background-color: #292929;
+  box-shadow: 0 1px 1px 0 black, inset 0 0 1px 1px #0a0a0a, inset 0 0 0 4px #3d3d3d;
+}
+#mixer-controls input[type=checkbox]:checked::before {
+  color: yellow;
 }
 #mixer-controls input[type=checkbox]:checked::after {
-  background-color: yellow;
+  background: yellow;
+}
+#mixer-controls input[type=checkbox][data-content]::before {
+  content: attr(data-content);
+  font-size: 0.75rem;
+  text-align: center;
 }
 #mixer-controls input[type=checkbox]::after {
-  content: "";
   display: inline-block;
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961'/%3E%3C/svg%3E%0A");
           mask-image: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961'/%3E%3C/svg%3E%0A");
@@ -147,13 +189,11 @@
   -webkit-mask-size: contain;
           mask-size: contain;
   background-color: #333;
-  display: block;
 }
 
 #tracks {
   --title-size: 120px;
   display: grid;
-  /* grid-template-columns: repeat(2, 50%); */
   grid-template-columns: repeat(2, 1fr) 0.5fr repeat(2, 1fr);
   grid-template-rows: repeat(2, 6rem);
   grid-template-areas: "track-1 track-1 mixer-controls track-2 track-2" "track-1 track-1 mixer-controls track-2 track-2";
@@ -173,13 +213,14 @@
 #tracks [id*=placeholder-]::before {
   content: "";
   width: 50%;
-  height: 0.1rem;
+  height: 0.15rem;
   position: absolute;
+  border-radius: 0.15rem;
   top: 0;
   left: 50%;
   translate: -50% 0;
   background: radial-gradient(circle at center, gray 0%, #333 120%) !important;
-  box-shadow: 0 0 4px 2px rgba(51, 51, 51, 0.25), 0 0 10px 0 rgba(51, 51, 51, 0.5) !important;
+  box-shadow: 0 0 4px 2px rgba(51, 51, 51, 0.25), 0 0 10px 0 rgba(51, 51, 51, 0.5), 0 0 0 0.25rem #333 !important;
 }
 #tracks [id*=placeholder-] img {
   width: 100%;
@@ -198,6 +239,9 @@
   border-radius: 0.25rem;
   background-color: #595959;
 }
+.track.focused {
+  outline: 2px solid pink;
+}
 .track[data-selected] {
   display: flex;
   flex-direction: column;
@@ -207,35 +251,29 @@
 .track[data-selected]::before {
   content: "";
   width: 50%;
-  height: 0.1rem;
+  height: 0.15rem;
   position: absolute;
+  border-radius: 0.15rem;
   top: 0;
   left: 50%;
   translate: -50% 0;
   background: radial-gradient(circle at center, rgba(77, 77, 77, 0) 0%, transparent 120%) !important;
-  box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.25), 0 0 10px 0 rgba(0, 0, 0, 0.5), 0 0 0 0.25rem #333 !important;
 }
 .track[data-selected="0"] {
   grid-area: track-1;
   position: relative;
-  /* order: -1; */
 }
 .track[data-selected="0"]::before {
   background: radial-gradient(circle at center, #8ffffe 0%, #00f5f3 120%) !important;
-  box-shadow: 0 0 4px 2px rgba(0, 245, 243, 0.25), 0 0 10px 0 rgba(0, 245, 243, 0.5) !important;
-}
-.track[data-selected="0"] .controls input[type=checkbox][class=playpause] {
-  grid-area: play-1;
+  box-shadow: 0 0 4px 2px rgba(0, 245, 243, 0.25), 0 0 10px 0 rgba(0, 245, 243, 0.5), 0 0 0 0.25rem #333 !important;
 }
 .track[data-selected="1"] {
   grid-area: track-2;
 }
 .track[data-selected="1"]::before {
   background: radial-gradient(circle at center, #fdc9ff 0%, #f830ff 120%) !important;
-  box-shadow: 0 0 4px 2px rgba(248, 48, 255, 0.25), 0 0 10px 0 rgba(248, 48, 255, 0.5) !important;
-}
-.track[data-selected="1"] .controls input[type=checkbox][class=playpause] {
-  grid-area: play-2;
+  box-shadow: 0 0 4px 2px rgba(248, 48, 255, 0.25), 0 0 10px 0 rgba(248, 48, 255, 0.5), 0 0 0 0.25rem #333 !important;
 }
 .track[data-playing] .title::after,
 .track[data-playing] .title::before {
@@ -251,7 +289,6 @@
   height: 2rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   background-color: #2b2b2b;
   padding-inline: 0.25rem;
 }
@@ -263,55 +300,76 @@
   color: #eee;
   flex: 1;
 }
-.track .title::before {
-  border-right: 1px solid #eee;
+.track .title::after {
+  margin-left: 0.15rem;
 }
 @keyframes scroll-text {
   from {
     transform: translateX(0%);
   }
   to {
-    transform: translateX(calc(-100% - 0.5rem));
+    transform: translateX(calc(-100% - 0.15rem));
   }
 }
 
 .controls {
   flex: 1;
-  background-color: #2b2b2b;
-  box-shadow: inset 0 0 4px 2px #1a1a1a;
+  background-color: #292929;
+  box-shadow: inset 0 0 2px 2px #0a0a0a;
   border-radius: 0.25rem;
   overflow: hidden;
-  display: grid;
-  grid-template-areas: "play-2 mute play-1" "volume volume volume" "speed speed speed" "playback playback playback";
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  place-items: center;
+  display: flex;
+  flex-wrap: wrap;
 }
-.controls input[type=checkbox][class=playpause],
-.controls input[type=checkbox][class=mute] {
+.controls input[type=checkbox] {
   display: flex;
   justify-content: center;
   align-items: center;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  background-color: #eee;
+  background-color: #3d3d3d;
+  padding: 0.5rem;
+  flex: 1;
+  box-shadow: 0 2px 2px 1px #0a0a0a, inset 0 0 1px 1px #0a0a0a, inset 0 0 0 4px #5c5c5c;
+  cursor: pointer;
+  transition: all 250ms ease-in-out;
 }
-.controls input[type=checkbox][class=playpause]::after,
-.controls input[type=checkbox][class=mute]::after {
+.controls input[type=checkbox]::after {
   width: 1.25rem;
   aspect-ratio: 1/1;
+  background-color: #333;
+  transition: all 250ms ease-in-out;
 }
-.controls input[type=checkbox][class=playpause]:checked,
-.controls input[type=checkbox][class=mute]:checked {
-  background-color: #555;
+.controls input[type=checkbox]:hover {
+  color: #adad00;
 }
-.controls input[type=checkbox][class=playpause]:checked::after,
-.controls input[type=checkbox][class=mute]:checked::after {
-  background-color: yellow;
+.controls input[type=checkbox]:hover::after {
+  background: yellow;
+}
+.controls input[type=checkbox]:active .controls input[type=checkbox]:checked:active {
+  color: #ffff52;
+  background-color: #242424;
+  box-shadow: 0 0 1px 0 black, inset 0 0 1px 1px #0a0a0a, inset 0 0 0 4px #303030;
+}
+.controls input[type=checkbox]:active .controls input[type=checkbox]:checked:active::before {
+  color: yellow;
+}
+.controls input[type=checkbox]:active .controls input[type=checkbox]:checked:active::after {
+  background: yellow;
+}
+.controls input[type=checkbox]:checked {
+  background-color: #292929;
+  box-shadow: 0 1px 1px 0 black, inset 0 0 1px 1px #0a0a0a, inset 0 0 0 4px #3d3d3d;
+}
+.controls input[type=checkbox]:checked::before {
+  color: yellow;
+}
+.controls input[type=checkbox]:checked::after {
+  background: yellow;
 }
 .controls input[type=checkbox][class=playpause] {
-  /* grid-area: play-1; */
+  grid-area: top-center;
 }
 .controls input[type=checkbox][class=playpause]::after {
   content: "";
@@ -324,11 +382,9 @@
           mask-position: center;
   -webkit-mask-size: contain;
           mask-size: contain;
-  background-color: #333;
-  display: block;
 }
 .controls input[type=checkbox][class=mute] {
-  grid-area: mute;
+  grid-area: top-left;
 }
 .controls input[type=checkbox][class=mute]::after {
   content: "";
@@ -341,8 +397,6 @@
           mask-position: center;
   -webkit-mask-size: contain;
           mask-size: contain;
-  background-color: #333;
-  display: block;
 }
 .controls input[type=range] {
   -moz-appearance: none;
@@ -358,6 +412,9 @@
 .controls input[type=range]::before {
   padding-left: 0.5rem;
   pointer-events: none;
+  color: #5c5c5c;
+  font-size: 0.75rem;
+  font-weight: bold;
 }
 .controls input[type=range]::-webkit-slider-thumb {
   --width: 0.15rem;
@@ -378,26 +435,23 @@
   margin-inline: 0.5rem;
   border-radius: 0.5rem;
 }
-.controls input[type=range][class=volume] {
-  grid-area: volume;
-}
 .controls input[type=range][class=volume]::before {
   content: "VOL";
 }
-.controls input[type=range][class=speed] {
-  grid-area: speed;
+.controls input[type=range][class=panning]::before {
+  content: "PAN";
 }
 .controls input[type=range][class=speed]::before {
   content: "RPM";
-}
-.controls input[type=range][class=playback] {
-  grid-area: playback;
 }
 .controls input[type=range][class=playback]::before {
   content: "SEK";
 }
 .controls [data-content] {
-  /* padding-block: 0.5rem; */
+  position: relative;
+}
+.controls [data-content]::before {
+  content: attr(data-content);
 }
 .controls input,
 .controls button {

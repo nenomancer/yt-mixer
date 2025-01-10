@@ -1,41 +1,20 @@
 .controls {
   flex: 1;
-  background-color: darken($color-faceplate, 3);
-  box-shadow: inset 0 0 4px 2px darken($color-faceplate, 10);
+  background-color: $color-dark-1;
+  box-shadow: inset 0 0 2px 2px $color-dark-2;
   border-radius: 0.25rem;
   overflow: hidden;
 
-  display: grid;
-  grid-template-areas:
-    "play-2 mute play-1"
-    "volume volume volume"
-    "speed speed speed"
-    "playback playback playback";
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat((4, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  // align-items: center;
 
-  place-items: center;
-  input[type="checkbox"][class="playpause"],
-  input[type="checkbox"][class="mute"] {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    appearance: none;
-    background-color: #eee;
-    &::after {
-      width: 1.25rem;
-      aspect-ratio: 1/1;
-    }
-    &:checked {
-      background-color: #555;
-      &::after {
-        background-color: yellow;
-      }
-    }
+  input[type="checkbox"] {
+    @include checkbox-button();
   }
 
   input[type="checkbox"][class="playpause"] {
-    /* grid-area: play-1; */
+    grid-area: top-center;
 
     &::after {
       content: "";
@@ -44,13 +23,10 @@
       mask-repeat: no-repeat;
       mask-position: center;
       mask-size: contain;
-
-      background-color: $color-faceplate;
-      display: block;
     }
   }
   input[type="checkbox"][class="mute"] {
-    grid-area: mute;
+    grid-area: top-left;
     &::after {
       content: "";
       display: inline-block;
@@ -58,9 +34,6 @@
       mask-repeat: no-repeat;
       mask-position: center;
       mask-size: contain;
-
-      background-color: $color-faceplate;
-      display: block;
     }
   }
   input[type="range"] {
@@ -76,6 +49,9 @@
     &::before {
       padding-left: 0.5rem;
       pointer-events: none;
+      color: $color-light-2;
+      font-size: 0.75rem;
+      font-weight: bold;
     }
 
     &::-webkit-slider-thumb {
@@ -99,32 +75,33 @@
     }
   }
   input[type="range"][class="volume"] {
-    grid-area: volume;
+    // grid-area: volume;
     &::before {
       content: "VOL";
     }
   }
+  input[type="range"][class="panning"] {
+    // grid-area: volume;
+    &::before {
+      content: "PAN";
+    }
+  }
   input[type="range"][class="speed"] {
-    grid-area: speed;
+    // grid-area: speed;
     &::before {
       content: "RPM";
     }
   }
   input[type="range"][class="playback"] {
-    grid-area: playback;
+    // grid-area: playback;
     &::before {
       content: "SEK";
     }
   }
   [data-content] {
-    // position: relative;
-    /* padding-block: 0.5rem; */
+    position: relative;
     &::before {
-      // content: attr(data-content);
-      // position: absolute;
-      // top: -60%;
-      // left: 50%;
-      // translate: -50% 0;
+      content: attr(data-content);
     }
   }
   input,

@@ -8,6 +8,14 @@ $color-first-track: #00f5f3;
 $color-second-track: #f830ff;
 
 $color-faceplate: #333;
+$color-dark-1: darken($color-faceplate, 4);
+$color-dark-2: darken($color-faceplate, 16);
+$color-dark-3: darken($color-faceplate, 32);
+$color-light-1: lighten($color-faceplate, 4);
+$color-light-2: lighten($color-faceplate, 16);
+$color-light-3: lighten($color-faceplate, 48);
+
+$color-led: yellow;
 
 $shadow-bevel-light: rgba(255, 255, 255, 0.1);
 $shadow-bevel-dark: rgba(0, 0, 0, 0.3);
