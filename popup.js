@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const lockPlayPause = document.getElementById("lock-playpause");
   let isScrubbingTimeline = false;
   let isLoadingMode = false;
-  let isScrolling = false;
 
   const selectedTabs = [];
   const selectedThumbnails = [];
@@ -242,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const volumeSlider = createElement("input", ["volume"], {
       type: "range",
       min: 0,
-      max: 0.5,
+      max: 0.9,
       step: 0.005,
       value: playbackInfo.volume,
       "data-content": `Volume: ${playbackInfo.volume}`,
@@ -371,9 +370,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { action: "getPlaybackInfo" },
         (playbackInfo) => {
           const title = createElement("h4", ["title"], {
-            "data-content": tab.title
-              .replace(/- YouTube$/, "")
-              .replace(/^\(\d+\)\s*/, ""),
+            "data-content":
+              tab.title.replace(/- YouTube$/, "").replace(/^\(\d+\)\s*/, "") +
+              " | ",
           });
           tabElement.appendChild(title);
           const controlsContainer = createControls(tab, playbackInfo);
