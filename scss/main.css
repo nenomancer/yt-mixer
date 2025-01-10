@@ -422,7 +422,6 @@
   -webkit-appearance: none;
           appearance: none;
   height: 1rem;
-  /* aspect-ratio: 1/1; */
   width: var(--width);
   background-color: #3b3b3b;
   cursor: pointer;

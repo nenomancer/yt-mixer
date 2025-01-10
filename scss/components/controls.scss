@@ -7,7 +7,6 @@
 
   display: flex;
   flex-wrap: wrap;
-  // align-items: center;
 
   input[type="checkbox"] {
     @include checkbox-button();
@@ -59,7 +58,6 @@
       --color: #999;
       appearance: none;
       height: 1rem;
-      /* aspect-ratio: 1/1; */
       width: var(--width);
       background-color: lighten($color-faceplate, 3);
       cursor: pointer;
@@ -75,25 +73,21 @@
     }
   }
   input[type="range"][class="volume"] {
-    // grid-area: volume;
     &::before {
       content: "VOL";
     }
   }
   input[type="range"][class="panning"] {
-    // grid-area: volume;
     &::before {
       content: "PAN";
     }
   }
   input[type="range"][class="speed"] {
-    // grid-area: speed;
     &::before {
       content: "RPM";
     }
   }
   input[type="range"][class="playback"] {
-    // grid-area: playback;
     &::before {
       content: "SEK";
     }
