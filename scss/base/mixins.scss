@@ -1,14 +1,13 @@
-@mixin glow($color: orange) {
+@mixin glow($color: $color-led) {
   background: radial-gradient(
     circle at center,
     lighten($color, 30) 0%,
     $color 120%
   ) !important;
-  box-shadow: 0 0 4px 2px rgba($color, 0.25), 0 0 10px 0 rgba($color, 0.5) !important;
+  box-shadow: 0 0 4px 2px rgba($color, 0.25), 0 0 10px 0 rgba($color, 0.5),  0 0 0 0.25rem $color-faceplate !important;
 }
 
-@mixin blinking-glow($color-on: orange, $color-off: #666) {
-  // $color-unlit: #666;
+@mixin blinking-glow($color-on: $color-led, $color-off: #666) {
   animation: blink 1.5s infinite;
   animation-fill-mode: both;
 
@@ -20,7 +19,7 @@
         $color-on 120%
       );
       box-shadow: 0 0 4px 2px rgba($color-on, 0.75),
-        0 0 10px 0 rgba($color-on, 0.5);
+        0 0 10px 0 rgba($color-on, 0.5), 0 0 0 0.25rem $color-faceplate;
     }
 
     50% {
@@ -30,7 +29,7 @@
         $color-off 120%
       );
       box-shadow: 0 0 4px 2px rgba($color-off, 0.75),
-        0 0 10px 0 rgba($color-off, 0.5);
+        0 0 10px 0 rgba($color-off, 0.5), 0 0 0 0.25rem $color-faceplate;
     }
 
     100% {
@@ -40,7 +39,63 @@
         $color-on 120%
       );
       box-shadow: 0 0 4px 2px rgba($color-on, 0.75),
-        0 0 10px 0 rgba($color-on, 0.5);
+        0 0 10px 0 rgba($color-on, 0.5), 0 0 0 0.25rem $color-faceplate;
+    }
+  }
+}
+
+@mixin checkbox-button() {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  appearance: none;
+  background-color: $color-light-1;
+  padding: 0.5rem;
+  flex: 1;
+  box-shadow: 0 2px 2px 1px $color-dark-2, inset 0 0 1px 1px $color-dark-2,
+    inset 0 0 0 4px $color-light-2;
+  cursor: pointer;
+  transition: all $anim-normal;
+
+  &::after {
+    width: 1.25rem;
+    aspect-ratio: 1/1;
+    background-color: $color-faceplate;
+    transition: all $anim-normal;
+  }
+
+  &:hover {
+    color: darken($color-led, 16);
+
+    &::after {
+      background: $color-led;
+    }
+  }
+
+  &:active &:checked:active {
+    color: lighten($color-led, 16);
+    background-color: darken($color-light-1, 10);
+    box-shadow: 0 0 1px 0 $color-dark-3, inset 0 0 1px 1px $color-dark-2,
+      inset 0 0 0 4px darken($color-light-1, 5);
+    &::before {
+      color: $color-led;
+    }
+
+    &::after {
+      background: $color-led;
+    }
+  }
+
+  &:checked {
+    background-color: $color-dark-1;
+    box-shadow: 0 1px 1px 0 $color-dark-3, inset 0 0 1px 1px $color-dark-2,
+      inset 0 0 0 4px $color-light-1;
+    &::before {
+      color: $color-led;
+    }
+
+    &::after {
+      background: $color-led;
     }
   }
 }

@@ -3,12 +3,10 @@ export function handleTabs(tabElement, selectedTabs) {
     if (selectedTabs.length >= 2) {
       const removedTab = selectedTabs.pop();
       removedTab.removeAttribute("data-selected");
-      removedTab.querySelector('input[type="range"]').disabled = true;
     }
     selectedTabs.push(tabElement);
   } else {
     tabElement.removeAttribute("data-selected");
-    tabElement.querySelector('input[type="range"]').disabled = true;
 
     const index = selectedTabs.indexOf(tabElement);
     if (index !== -1) {
@@ -19,7 +17,6 @@ export function handleTabs(tabElement, selectedTabs) {
   // Update the data-selected attribute on all selected tabs
   selectedTabs.forEach((tab, index) => {
     tab.setAttribute("data-selected", index);
-    tab.querySelector('input[type="range"]').disabled = false;
   });
 }
 
@@ -52,7 +49,6 @@ export function handleThumbnailClick(
 
       const removedTab = selectedTabs.pop();
       removedTab.removeAttribute("data-selected");
-      removedTab.querySelector('input[type="range"]').disabled = true;
     }
     selectedTabs.push(tabElement);
     selectedThumbnails.push(thumbnail);
@@ -60,7 +56,6 @@ export function handleThumbnailClick(
     thumbnail.removeAttribute("data-selected");
 
     tabElement.removeAttribute("data-selected");
-    tabElement.querySelector('input[type="range"]').disabled = true;
     const thumbIndex = selectedThumbnails.indexOf(thumbnail);
     if (thumbIndex !== -1) {
       selectedThumbnails.splice(thumbIndex, 1);
@@ -72,12 +67,37 @@ export function handleThumbnailClick(
     }
   }
 
-  // Update the data-selected attribute on all selected tabs
+  chrome.storage.session.get(null, (items) => {
+    const itemsToRemove = Object.keys(items).filter((key) =>
+      key.startsWith("tabID-")
+    );
+
+    itemsToRemove?.forEach((item) => {
+      chrome.storage.session.remove(item, () => {
+        if (chrome.runtime.lastError) {
+          console.error(
+            `Error removing key ${item}:`,
+            chrome.runtime.lastError
+          );
+        }
+      });
+    });
+
+    updateSelectedThumbnails(selectedThumbnails);
+    updateSelectedTabs(selectedTabs);
+  });
+}
+
+function updateSelectedTabs(selectedTabs) {
   selectedTabs.forEach((tab, index) => {
     tab.setAttribute("data-selected", index);
-    tab.querySelector('input[type="range"]').disabled = false;
+    const id = tab.getAttribute("data-id");
+    const key = `tabID-${id}`;
+    chrome.storage.session.set({ [key]: id });
   });
+}
 
+function updateSelectedThumbnails(selectedThumbnails) {
   selectedThumbnails.forEach((thumbnail, index) => {
     thumbnail.setAttribute("data-selected", index);
   });
@@ -94,6 +114,7 @@ export function toggleMute(id, isChecked) {
 export function setVolume(id, volume, element) {
   if (element) {
     element.setAttribute("data-content", `Volume: ${volume}`);
+    element.value = volume;
   }
   chrome.tabs.sendMessage(id, {
     action: "setVolume",
@@ -104,14 +125,14 @@ export function setVolume(id, volume, element) {
 export function setSpeed(id, speed, element) {
   element.value = speed;
   element.setAttribute("data-content", `Speed: ${element.value}`);
-  chrome.tabs.sendMessage(id, { action: "setSpeed", speed });
+  chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", speed });
 }
 
-export function setLockedVolume(tabElement, selectedTabs, volume) {
+export function setLockedVolume(mainTabElement, selectedTabs, volume) {
   selectedTabs.forEach((tab) => {
-    if (tabElement === tab) return;
+    if (mainTabElement === tab) return;
 
-    const total = 1.0;
+    const total = 0.9;
 
     const otherVolume = total - volume;
     const otherVolumeSlider = tab.querySelector(".volume");
@@ -124,10 +145,10 @@ export function setLockedVolume(tabElement, selectedTabs, volume) {
 export function togglePlay(id, isChecked, element) {
   if (isChecked) {
     element.setAttribute("data-playing", true);
-    chrome.tabs.sendMessage(id, { action: "setPlaying" });
+    chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", play: true });
   } else {
     element.removeAttribute("data-playing");
-    chrome.tabs.sendMessage(id, { action: "setPaused" });
+    chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", pause: true });
   }
 }
 

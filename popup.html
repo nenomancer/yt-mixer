@@ -4,17 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="scss/main.css" />
-    <script src="popup.js" defer></script>
-    <title>Mixxa</title>
+    <script src="helpers.js" defer type="module"></script>
+    <script src="popup.js" defer type="module"></script>
+    <title>Nenomancer's Youtube Mixer</title>
   </head>
   <body>
     <div id="container">
-      <h1>Youtube Mixa</h1>
       <div id="thumbnails" tabindex="-1"></div>
       <div id="tracks">
         <div id="mixer-controls">
-          <input type="checkbox" id="lock-playpause" name="lock-playpause" />
-          <input type="checkbox" id="lock-volume" name="lock-volume" />
+          <h4 class="title"></h4>
+          <div>
+            <input
+              type="checkbox"
+              id="lock-playpause"
+              name="lock-playpause"
+              data-content="Lock Play"
+            />
+            <input
+              type="checkbox"
+              id="lock-volume"
+              name="lock-volume"
+              data-content="Fader On"
+            />
+          </div>
         </div>
         <div id="placeholder-1">Click on a thumbnail to load a track</div>
         <div id="placeholder-2">Click on a thumbnail to load a track</div>

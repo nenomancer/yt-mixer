@@ -3,7 +3,7 @@
   "name": "Nenomancer's YouTube Mixer",
   "version": "1.0",
   "description": "Mix ya biiiatch",
-  "permissions": ["tabs", "activeTab", "scripting"],
+  "permissions": ["tabs", "activeTab", "scripting", "storage"],
   "host_permissions": ["https://www.youtube.com/*"],
   "action": {
     "default_popup": "popup.html"
