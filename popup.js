@@ -25,6 +25,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectedThumbnails = [];
   const keysPressed = {};
 
+  chrome.storage.session.get(null, (items) => {
+    const observer = new MutationObserver(() => {
+      Object.values(items).forEach((value) => {
+        const thumbnail = document.querySelector(`[data-thumb-id="${value}"]`);
+        const tabElement = document.querySelector(`[data-id="${value}"]`);
+
+        if (thumbnail && tabElement) {
+          handleThumbnailClick(
+            thumbnail,
+            tabElement,
+            selectedThumbnails,
+            selectedTabs
+          );
+        }
+      });
+
+      // Disconnect observer when all elements are found
+      if (
+        Object.values(items).every(
+          (value) =>
+            document.querySelector(`[data-thumb-id="${value}"]`) &&
+            document.querySelector(`[data-id="${value}"]`)
+        )
+      ) {
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+
   const setupKeyListeners = (tabs, index) => {
     document.addEventListener("keydown", (event) => {
       const key = event.key.toLowerCase();
@@ -122,10 +153,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     thumbnailContainer.addEventListener("blur", () => (isLoadingMode = false));
+
+    chrome.storage.session.get(
+      "isVolumeLocked",
+      (items) => (lockVolume.checked = items.isVolumeLocked)
+    );
+    chrome.storage.session.get(
+      "isPlayPauseLocked",
+      (items) => (lockPlayPause.checked = items.isPlayPauseLocked)
+    );
+    lockPlayPause.addEventListener("change", () => {
+      chrome.storage.session.set({ isPlayPauseLocked: lockPlayPause.checked });
+    });
   };
 
   const syncVolumeSliders = (tabs) => {
     lockVolume.addEventListener("change", () => {
+      chrome.storage.session.set({ isVolumeLocked: lockVolume.checked });
       tabs.forEach((tab) => {
         chrome.tabs.sendMessage(tab.id, { action: "getPlaying" }, () => {
           const firstTrack = document.querySelector('.tab[data-selected="0"]');
@@ -198,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const volumeSlider = createElement("input", ["volume"], {
       type: "range",
       min: 0,
-      max: 1,
+      max: 0.5,
       step: 0.005,
       value: playbackInfo.volume,
       "data-content": `Volume: ${playbackInfo.volume}`,
