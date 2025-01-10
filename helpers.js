@@ -132,7 +132,7 @@ export function setLockedVolume(mainTabElement, selectedTabs, volume) {
   selectedTabs.forEach((tab) => {
     if (mainTabElement === tab) return;
 
-    const total = 0.5;
+    const total = 0.9;
 
     const otherVolume = total - volume;
     const otherVolumeSlider = tab.querySelector(".volume");
