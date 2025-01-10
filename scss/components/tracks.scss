@@ -96,8 +96,8 @@
   }
 
   .title {
-    // $title-length: attr(data-length);
     --title-size: 0px;
+    $title-offset: 0.15rem;
 
     overflow: hidden;
     text-overflow: ellipsis;
@@ -106,9 +106,7 @@
     position: relative;
     height: 2rem;
     display: flex;
-    // justify-content: center;
     align-items: center;
-    // gap: 0.5rem;
     background-color: darken($color-faceplate, 3);
     padding-inline: 0.25rem;
     &::before,
@@ -122,15 +120,14 @@
     }
 
     &::after {
-      margin-left: 0.15rem;
+      margin-left: $title-offset;
     }
     @keyframes scroll-text {
       from {
         transform: translateX(0%);
       }
       to {
-        transform: translateX(calc(-100% - 0.15rem));
-        // transform: translateX(-100%);
+        transform: translateX(calc(-100% - $title-offset));
       }
     }
   }
