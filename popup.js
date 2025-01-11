@@ -8,6 +8,7 @@ import {
   setLockedVolume,
   setSpeed,
   setVolume,
+  toggleLockedPlay,
   toggleMute,
   togglePlay,
 } from "./helpers.js";
@@ -62,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const shortcutLoadingMode = keysPressed["shift"] && keysPressed["l"];
       const shortcutLockVolume = keysPressed["l"] && keysPressed["v"];
+      const shortcutLockPlay = keysPressed["l"] && keysPressed["p"];
       const shortcutFirstTrack = keysPressed["1"] || keysPressed["!"];
       const shortcutSecondTrack = keysPressed["2"] || keysPressed["@"];
       const shortcutBothTracks = shortcutFirstTrack && shortcutSecondTrack;
@@ -80,6 +82,23 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         }
       } else {
+        if (keysPressed["v"]) {
+          if (shortcutFirstTrack) {
+            selectedTabs[0].querySelector(".volume").classList.add("focused");
+            selectedTabs[1]
+              .querySelector(".volume")
+              .classList.remove("focused");
+          } else if (shortcutSecondTrack) {
+            selectedTabs[1].querySelector(".volume").classList.add("focused");
+            selectedTabs[0]
+              .querySelector(".volume")
+              .classList.remove("focused");
+          } else {
+            selectedTabs.forEach((tab) => {
+              tab.querySelector(".volume").classList.add("focused");
+            });
+          }
+        }
         if (shortcutFirstTrack) {
           selectedTabs[0]?.classList.add("focused");
         } else {
@@ -96,6 +115,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (shortcutLockVolume) {
           lockVolume.checked = !lockVolume.checked;
+        }
+        if (shortcutLockPlay) {
+          lockPlayPause.checked = !lockPlayPause.checked;
+          lockPlayPause.dispatchEvent(new Event("change"));
+        }
+
+        if (keysPressed["p"] && shortcutFirstTrack) {
+          if (!selectedTabs[0]) return;
+          const id = parseInt(selectedTabs[0].getAttribute("data-id"));
+          const isPlaying = selectedTabs[0].getAttribute("data-playing");
+          selectedTabs[0].querySelector(".playpause").checked = !isPlaying;
+          togglePlay(id, !isPlaying, selectedTabs[0]);
+        }
+        if (keysPressed["p"] && shortcutSecondTrack) {
+          if (!selectedTabs[1]) return;
+          const id = parseInt(selectedTabs[1].getAttribute("data-id"));
+          const isPlaying = selectedTabs[1].getAttribute("data-playing");
+          selectedTabs[1].querySelector(".playpause").checked = !isPlaying;
+          togglePlay(id, !isPlaying, selectedTabs[1]);
         }
       }
     });
@@ -143,12 +181,38 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         });
       }
+
+      if (keysPressed["r"]) {
+        if (shortcutBothTracks) {
+          tabsToAdjust = selectedTabs;
+        } else if (shortcutFirstTrack) {
+          tabsToAdjust = [selectedTabs[0]];
+        } else if (shortcutSecondTrack) {
+          tabsToAdjust = [selectedTabs[1]];
+        } else {
+          tabsToAdjust = selectedTabs;
+        }
+
+        tabsToAdjust?.forEach((tab) => {
+          if (!tab) return;
+
+          const speedElement = tab.querySelector(".speed");
+          const currentSpeed = parseFloat(speedElement.value);
+          const newSpeed = currentSpeed + value;
+
+          setSpeed(Number(tab.getAttribute("data-id")), newSpeed, speedElement);
+        });
+      }
     });
 
     document.addEventListener("keyup", (event) => {
       keysPressed[event.key.toLowerCase()] = false;
-      selectedTabs[0]?.classList.remove("focused");
-      selectedTabs[1]?.classList.remove("focused");
+
+      if (!selectedTabs.length) return;
+      selectedTabs.forEach((tab) => {
+        tab.classList.remove("focused");
+        tab.querySelector(".volume")?.classList.remove("focused");
+      });
     });
 
     thumbnailContainer.addEventListener("blur", () => (isLoadingMode = false));
@@ -194,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
       id: `mute-${tab.id}`,
       tabIndex: -1,
     });
-    muteCheckbox.checked = playbackInfo.isMuted;
+    muteCheckbox.checked = playbackInfo?.isMuted || false;
 
     muteCheckbox.addEventListener("change", () => {
       toggleMute(tab.id, muteCheckbox.checked, tab.element);
@@ -206,24 +270,13 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "checkbox",
       id: `playpause-${tab.id}`,
     });
-    playPauseCheckbox.checked = playbackInfo.isPlaying;
-    togglePlay(tab.id, playbackInfo.isPlaying, tab.element);
+    playPauseCheckbox.checked = playbackInfo?.isPlaying || false;
+    togglePlay(tab.id, playPauseCheckbox.checked, tab.element);
 
     playPauseCheckbox.addEventListener("change", () => {
       togglePlay(tab.id, playPauseCheckbox.checked, tab.element);
-
       if (lockPlayPause.checked) {
-        selectedTabs.forEach((selectedTab) => {
-          if (tab.element === selectedTab) return;
-          const otherPlayPauseCheckbox =
-            selectedTab.querySelector(".playpause");
-          otherPlayPauseCheckbox.checked = playPauseCheckbox.checked;
-          togglePlay(
-            parseInt(selectedTab.getAttribute("data-id")),
-            playPauseCheckbox.checked,
-            selectedTab
-          );
-        });
+        toggleLockedPlay(tab, playPauseCheckbox, selectedTabs);
       }
     });
 
@@ -243,8 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
       min: 0,
       max: 0.9,
       step: 0.005,
-      value: playbackInfo.volume,
-      "data-content": `Volume: ${playbackInfo.volume}`,
+      value: playbackInfo?.volume,
+      "data-content": `VOL`,
     });
 
     volumeSlider.addEventListener("input", () => {
@@ -265,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
       max: 1.75,
       step: 0.005,
       value: playbackInfo.speed,
-      "data-content": `Speed: ${playbackInfo.speed}`,
+      "data-content": `RPM`,
     });
 
     speedSlider.addEventListener("input", () => {
@@ -283,19 +336,20 @@ document.addEventListener("DOMContentLoaded", () => {
       min: "0",
       max: playbackInfo.duration,
       value: playbackInfo.currentTime,
-      "data-content": `${formatTime(playbackInfo.currentTime)} / ${formatTime(
-        playbackInfo.duration
-      )}`,
+      // "data-content": `${formatTime(playbackInfo.currentTime)} / ${formatTime(
+      //   playbackInfo.duration
+      // )}`,
+      "data-content": "SEK",
     });
 
     playbackSlider.addEventListener("input", () => {
       isScrubbingTimeline = true;
-      playbackSlider.setAttribute(
-        "data-content",
-        `${formatTime(playbackSlider.value)} / ${formatTime(
-          playbackSlider.max
-        )}`
-      );
+      // playbackSlider.setAttribute(
+      //   "data-content",
+      //   `${formatTime(playbackSlider.value)} / ${formatTime(
+      //     playbackSlider.max
+      //   )}`
+      // );
       chrome.tabs.sendMessage(tab.id, {
         action: "seek",
         time: playbackSlider.value,
@@ -314,12 +368,12 @@ document.addEventListener("DOMContentLoaded", () => {
           (updatedInfo) => {
             if (updatedInfo && !updatedInfo.error) {
               playbackSlider.value = updatedInfo.currentTime;
-              playbackSlider.setAttribute(
-                "data-content",
-                `${formatTime(playbackSlider.value)} / ${formatTime(
-                  playbackSlider.max
-                )}`
-              );
+              // playbackSlider.setAttribute(
+              //   "data-content",
+              //   `${formatTime(playbackSlider.value)} / ${formatTime(
+              //     playbackSlider.max
+              //   )}`
+              // );
             }
           }
         );
@@ -369,6 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tab.id,
         { action: "getPlaybackInfo" },
         (playbackInfo) => {
+          console.log("playback info: ", playbackInfo);
           const title = createElement("h4", ["title"], {
             "data-content":
               tab.title.replace(/- YouTube$/, "").replace(/^\(\d+\)\s*/, "") +
