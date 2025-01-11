@@ -5,11 +5,16 @@
   margin: 0;
   padding: 0;
   scrollbar-width: none;
+  outline: none;
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
 }
 
 #container {
   width: 480px;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   border-radius: 0.25rem;
   overflow: hidden;
   background-color: $color-faceplate;

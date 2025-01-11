@@ -113,7 +113,6 @@ export function toggleMute(id, isChecked) {
 
 export function setVolume(id, volume, element) {
   if (element) {
-    element.setAttribute("data-content", `Volume: ${volume}`);
     element.value = volume;
   }
   chrome.tabs.sendMessage(id, {
@@ -124,7 +123,6 @@ export function setVolume(id, volume, element) {
 
 export function setSpeed(id, speed, element) {
   element.value = speed;
-  element.setAttribute("data-content", `Speed: ${element.value}`);
   chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", speed });
 }
 
@@ -151,6 +149,18 @@ export function togglePlay(id, isChecked, element) {
     chrome.tabs.sendMessage(id, { action: "setPlaybackInfo", pause: true });
   }
 }
+export function toggleLockedPlay(tab, playPauseCheckbox, selectedTabs) {
+  selectedTabs.forEach((selectedTab) => {
+    if (tab.element === selectedTab) return;
+    const otherPlayPauseCheckbox = selectedTab.querySelector(".playpause");
+    otherPlayPauseCheckbox.checked = playPauseCheckbox.checked;
+    togglePlay(
+      parseInt(selectedTab.getAttribute("data-id")),
+      playPauseCheckbox.checked,
+      selectedTab
+    );
+  });
+}
 
 export function createElement(
   tag,
@@ -159,6 +169,7 @@ export function createElement(
   textContent = ""
 ) {
   const element = document.createElement(tag);
+  element.tabIndex = -1;
   if (classNames.length) {
     element.classList.add(...classNames);
   }

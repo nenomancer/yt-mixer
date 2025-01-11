@@ -2,9 +2,9 @@
   "manifest_version": 3,
   "name": "Nenomancer's YouTube Mixer",
   "version": "1.0",
-  "description": "Mix ya biiiatch",
-  "permissions": ["tabs", "activeTab", "scripting", "storage"],
-  "host_permissions": ["https://www.youtube.com/*"],
+  "description": "Mix two YouTube tracks with ease. Be a top-tier home DJ with Nenomancer's YouTube DJ Mixer!",
+  "permissions": ["tabs", "scripting", "storage"],
+  "host_permissions": ["https://www.youtube.com/watch*"],
   "action": {
     "default_popup": "popup.html"
   },

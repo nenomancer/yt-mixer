@@ -44,24 +44,33 @@
     background-color: transparent;
     display: flex;
     align-items: center;
-
-    &::before {
+    transition: color $anim-normal;
+    &::before,
+    &.focused::before {
+      content: attr(data-content);
       padding-left: 0.5rem;
       pointer-events: none;
       color: $color-light-2;
       font-size: 0.75rem;
-      font-weight: bold;
+      transition: color $anim-normal;
+    }
+
+    &:hover,
+    &.focused {
+      &::before {
+        color: $color-led;
+      }
     }
 
     &::-webkit-slider-thumb {
       --width: 0.15rem;
-      --color: #999;
       appearance: none;
       height: 1rem;
       width: var(--width);
-      background-color: lighten($color-faceplate, 3);
+      background-color: $color-light-2;
       cursor: pointer;
       transform: translateY(-44%);
+      box-shadow: 0 3px 1.5px 1px $color-dark-2;
     }
 
     &::-webkit-slider-runnable-track {
@@ -70,34 +79,31 @@
       cursor: pointer;
       margin-inline: 0.5rem;
       border-radius: 0.5rem;
+      box-shadow: inset 0 0 1px 0.5px $color-dark-3,
+        0 0 1px 0.5px $color-light-2;
     }
   }
-  input[type="range"][class="volume"] {
-    &::before {
-      content: "VOL";
-    }
-  }
-  input[type="range"][class="panning"] {
-    &::before {
-      content: "PAN";
-    }
-  }
-  input[type="range"][class="speed"] {
-    &::before {
-      content: "RPM";
-    }
-  }
-  input[type="range"][class="playback"] {
-    &::before {
-      content: "SEK";
-    }
-  }
-  [data-content] {
-    position: relative;
-    &::before {
-      content: attr(data-content);
-    }
-  }
+  // input[type="range"][class="volume"] {
+  //   &::before {
+  //     content: "VOL";
+  //   }
+  // }
+  // input[type="range"][class="speed"] {
+  //   &::before {
+  //     content: "RPM";
+  //   }
+  // }
+  // input[type="range"][class="playback"] {
+  //   &::before {
+  //     content: "SEK";
+  //   }
+  // }
+  // [data-content] {
+  //   position: relative;
+  //   // &::before {
+  //   //   content: attr(data-content);
+  //   // }
+  // }
   input,
   button {
     cursor: pointer;
