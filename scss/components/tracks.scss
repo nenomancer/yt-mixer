@@ -1,15 +1,3 @@
-@mixin light-display($light-color) {
-  content: "";
-  width: 50%;
-  height: 0.15rem;
-  position: absolute;
-  border-radius: 0.15rem;
-  top: 0;
-  left: 50%;
-  translate: -50% 0;
-  @include glow($light-color);
-}
-
 #tracks {
   --title-size: 120px;
 
@@ -20,18 +8,25 @@
     "track-1 track-1 mixer-controls track-2 track-2"
     "track-1 track-1 mixer-controls track-2 track-2";
 
+  padding: 0.5rem;
+  background-color: $color-dark-1;
+  border-radius: 0.25rem;
+
   [id*="placeholder-"] {
     border-radius: 0.25rem;
     overflow: hidden;
     box-shadow: $shadow-inner-bevel;
 
     display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     justify-content: center;
     align-items: center;
     position: relative;
     color: #eee;
     font-weight: bold;
     text-align: center;
+    padding: 0.5rem;
 
     &::before {
       @include light-display($color-faceplate);
@@ -52,38 +47,42 @@
 }
 
 .track {
-  /* padding: 1rem 0.5rem; */
   padding: 0.5rem;
   display: none;
   border-radius: 0.25rem;
   background-color: lighten($color-faceplate, 15);
-  &.focused {
-    outline: 2px solid pink;
-  }
+  transition: all $anim-snappy;
 
   &[data-selected] {
     display: flex;
     flex-direction: column;
     position: relative;
-    box-shadow: $shadow-inner-bevel, 0 0 1px 1px rgba(0, 0, 0, 0.15);
 
-    &::before {
-      @include light-display(transparent);
+    box-shadow: 0 0 0.25rem 0 transparent, 0 4px 0.5rem 0.1rem $color-dark-2;
+    &::after {
+      @include light-display($color: $color-faceplate);
     }
   }
 
   &[data-selected="0"] {
     grid-area: track-1;
     position: relative;
-    &::before {
+    &.focused {
+      box-shadow: 0 0 0.25rem 0 $color-first-track,
+        0 4px 0.5rem 0.1rem $color-dark-2;
+    }
+    &::after {
       @include glow($color-first-track);
     }
   }
 
   &[data-selected="1"] {
     grid-area: track-2;
-
-    &::before {
+    &.focused {
+      box-shadow: 0 0 0.25rem 0 $color-second-track,
+        0 4px 0.5rem 0.1rem $color-dark-2;
+    }
+    &::after {
       @include glow($color-second-track);
     }
   }
@@ -109,6 +108,7 @@
     align-items: center;
     background-color: darken($color-faceplate, 3);
     padding-inline: 0.25rem;
+    box-shadow: inset 0 0 0.1rem 0.1rem $color-dark-2;
     &::before,
     &::after {
       content: attr(data-content);

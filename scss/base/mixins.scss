@@ -3,11 +3,11 @@
     circle at center,
     lighten($color, 30) 0%,
     $color 120%
-  ) !important;
-  box-shadow: 0 0 4px 2px rgba($color, 0.25), 0 0 10px 0 rgba($color, 0.5),  0 0 0 0.25rem $color-faceplate !important;
+  );
+  box-shadow: 0 0 4px 2px rgba($color, 0.25), 0 0 10px 0 rgba($color, 0.5);
 }
 
-@mixin blinking-glow($color-on: $color-led, $color-off: #666) {
+@mixin blinking-glow($color-on: $color-led, $color-off: $color-faceplate) {
   animation: blink 1.5s infinite;
   animation-fill-mode: both;
 
@@ -19,7 +19,7 @@
         $color-on 120%
       );
       box-shadow: 0 0 4px 2px rgba($color-on, 0.75),
-        0 0 10px 0 rgba($color-on, 0.5), 0 0 0 0.25rem $color-faceplate;
+        0 0 10px 0 rgba($color-on, 0.5);
     }
 
     50% {
@@ -29,7 +29,7 @@
         $color-off 120%
       );
       box-shadow: 0 0 4px 2px rgba($color-off, 0.75),
-        0 0 10px 0 rgba($color-off, 0.5), 0 0 0 0.25rem $color-faceplate;
+        0 0 10px 0 rgba($color-off, 0.5);
     }
 
     100% {
@@ -39,8 +39,42 @@
         $color-on 120%
       );
       box-shadow: 0 0 4px 2px rgba($color-on, 0.75),
-        0 0 10px 0 rgba($color-on, 0.5), 0 0 0 0.25rem $color-faceplate;
+        0 0 10px 0 rgba($color-on, 0.5);
     }
+  }
+}
+
+@mixin light-display(
+  $content: "",
+  $width: 50%,
+  $color: transparent,
+  $align: top,
+  $blinking: "off"
+) {
+  content: $content;
+  width: $width;
+  height: 0.15rem;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+
+  @if $align == "bottom" {
+    bottom: 0;
+    border-top-left-radius: 0.15rem;
+    border-top-right-radius: 0.15rem;
+  } @else if ($align == "top") {
+    top: 0;
+    border-bottom-left-radius: 0.15rem;
+    border-bottom-right-radius: 0.15rem;
+  }
+  left: 50%;
+  translate: -50% 0;
+  @include glow($color);
+
+  @if ($blinking == "on") {
+    @include blinking-glow($color, $color-faceplate);
   }
 }
 
@@ -50,6 +84,7 @@
   align-items: center;
   appearance: none;
   background-color: $color-light-1;
+  color: $color-dark-3;
   padding: 0.5rem;
   flex: 1;
   box-shadow: 0 2px 2px 1px $color-dark-2, inset 0 0 1px 1px $color-dark-2,
@@ -60,7 +95,7 @@
   &::after {
     width: 1.25rem;
     aspect-ratio: 1/1;
-    background-color: $color-faceplate;
+    background-color: $color-dark-1;
     transition: all $anim-normal;
   }
 
@@ -72,7 +107,8 @@
     }
   }
 
-  &:active &:checked:active {
+  &:active,
+  &:checked:active {
     color: lighten($color-led, 16);
     background-color: darken($color-light-1, 10);
     box-shadow: 0 0 1px 0 $color-dark-3, inset 0 0 1px 1px $color-dark-2,

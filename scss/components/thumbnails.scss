@@ -6,19 +6,31 @@
   pointer-events: none;
   background-color: darken($color-faceplate, 5);
   padding: 0.5rem;
+  border-radius: 0.25rem;
 
   &:focus-visible {
     outline: none;
-    .thumbnail {
+    .thumbnail:not([data-selected]) {
       opacity: 1;
       filter: grayscale(0);
       &::after {
-        content: attr(data-order-id);
-        height: 1.5em;
-        @include blinking-glow();
+        @include light-display(
+          $content: attr(data-order-id),
+          $color: $color-led,
+          $align: bottom,
+          $blinking: "on",
+          $width: 25%
+        );
+
         color: $color-dark-2;
         font-weight: bold;
+        height: 1.5em;
+        // content: attr(data-order-id) + "asdasdasdsds";
       }
+    }
+    .thumbnail[data-selected]::after {
+      color: $color-dark-2;
+      height: 1.5em;
     }
   }
 }
@@ -26,6 +38,7 @@
 .thumbnail {
   pointer-events: all;
   aspect-ratio: 1/1;
+  aspect-ratio: 14/10;
   object-fit: cover;
   width: 100%;
   cursor: pointer;
@@ -34,36 +47,30 @@
   opacity: 0.5;
   filter: grayscale(1);
   background-size: cover;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  transition: filter $anim-normal;
+  transition: all $anim-normal;
 
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: flex-end;
 
-  $border-width: 0.5rem;
-  border: 0.5rem solid $color-faceplate;
+  box-shadow: 0 4px 4px 2px $color-dark-2, inset 0 0 0 0.25rem $color-light-2,
+    inset 0 0 4px 0.5rem rgba(0, 0, 0, 0.6);
 
   &:hover {
     filter: grayscale(0.5);
   }
 
   &::after {
-    content: "";
-    border-radius: 0.15rem;
-    width: 1.5rem;
-    height: 0.25rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: transparent;
-    border-top: none;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    @include light-display(
+      $content: attr(data-order-id),
+      $color: $color-faceplate,
+      $align: bottom,
+      $width: 25%
+    );
 
-    box-shadow: 0 0 0 0.25rem $color-faceplate;
-    background-color: $color-light-3;
     transition: height $anim-normal, color $anim-normal 150ms;
   }
 
@@ -71,16 +78,17 @@
     position: relative;
     opacity: 1;
     filter: grayscale(0);
+    content: attr(data-order-id);
+    box-shadow: 0 2px 2px 1px $color-dark-2, inset 0 0 0 0.25rem $color-light-2,
+      inset 0 0 4px 0.5rem rgba(0, 0, 0, 0.6);
   }
   &[data-selected="0"] {
     &::after {
-      background-color: $color-first-track;
       @include glow($color-first-track);
     }
   }
   &[data-selected="1"] {
     &::after {
-      background-color: $color-second-track;
       @include glow($color-second-track);
     }
   }

@@ -3,16 +3,17 @@ $icon-mute: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:tex
 $icon-link: url("data:image/svg+xml,%3Csvg class='w-6 h-6 text-gray-800 dark:text-white' aria-hidden='true' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961'/%3E%3C/svg%3E%0A");
 
 $anim-normal: 250ms ease-in-out;
+$anim-snappy: 250ms cubic-bezier(0.14, 0.82, 0.57, 1.02);
 
-$color-first-track: #00f5f3;
-$color-second-track: #f830ff;
+$color-first-track: hsl(180, 100%, 48%);
+$color-second-track: hsl(120, 100%, 48%);
 
 $color-faceplate: #333;
 $color-dark-1: darken($color-faceplate, 4);
-$color-dark-2: darken($color-faceplate, 16);
+$color-dark-2: darken($color-faceplate, 12);
 $color-dark-3: darken($color-faceplate, 32);
 $color-light-1: lighten($color-faceplate, 4);
-$color-light-2: lighten($color-faceplate, 16);
+$color-light-2: lighten($color-faceplate, 12);
 $color-light-3: lighten($color-faceplate, 48);
 
 $color-led: yellow;
