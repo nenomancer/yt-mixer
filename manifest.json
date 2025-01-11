@@ -3,6 +3,11 @@
   "name": "Nenomancer's YouTube Mixer",
   "version": "1.0",
   "description": "Mix two YouTube tracks with ease. Be a top-tier home DJ with Nenomancer's YouTube DJ Mixer!",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["tabs", "scripting", "storage"],
   "host_permissions": ["https://www.youtube.com/watch*"],
   "action": {
