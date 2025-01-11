@@ -317,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       min: 0.25,
       max: 1.75,
       step: 0.005,
-      value: playbackInfo.speed,
+      value: playbackInfo?.speed,
       "data-content": `RPM`,
     });
 
@@ -334,8 +334,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const playbackSlider = createElement("input", ["playback"], {
       type: "range",
       min: "0",
-      max: playbackInfo.duration,
-      value: playbackInfo.currentTime,
+      max: playbackInfo?.duration,
+      value: playbackInfo?.currentTime,
       // "data-content": `${formatTime(playbackInfo.currentTime)} / ${formatTime(
       //   playbackInfo.duration
       // )}`,
