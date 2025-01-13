@@ -76,7 +76,3 @@ The extension detects and works with all currently open YouTube tabs in your bro
 - **Loading Mode (Press 1 - [number of tabs array length])**: Press the corresponding number key to load a specific video into the mixer.
 - **Hold 1**: Select the first track.
 - **Hold 2**: Select the second track.
-
-## License
-
-This tool is open-source and free to use. Feel free to modify or redistribute the code as per your needs. Please refer to the LICENSE file for more details.
